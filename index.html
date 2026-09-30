@@ -713,7 +713,12 @@ function render(){
     addWrap.appendChild(box);
   });
   addWrap.querySelectorAll("input[type=checkbox]").forEach(cb=>{
-    cb.addEventListener("change",e=>{ adicionalesState[e.target.dataset.id]=e.target.checked; render(); });
+    cb.addEventListener("change",e=>{
+      adicionalesState[e.target.dataset.id]=e.target.checked;
+      const jf=$("jacuzziProfField");
+      if(jf) jf.style.display=adicionalesState.jacuzzi30?"block":"none";
+      render();
+    });
   });
   const selectedAdds = adds.filter(a=>adicionalesState[a.id]);
   const addTotal = selectedAdds.reduce((s,a)=>s+a.precio,0);
