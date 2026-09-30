@@ -244,7 +244,12 @@
         </div>
         <div class="field">
           <label>Espesor de losa (m) — manual</label>
-          <input type="number" id="espesorLosa" value="0.15" step="0.01">
+          <input type="number" id="espesorLosa" value="0.20" step="0.01">
+        </div>
+        <div class="field" id="jacuzziProfField" style="display:none">
+          <label>Profundidad Jacuzzi 3 × 3 (m)</label>
+          <input type="number" id="profJacuzzi30" value="" min="0.5" step="0.05" placeholder="Ingresar profundidad">
+          <div class="hint">Necesaria para calcular muros. Asiento perimetral fijo: huella 0,50 m × contrahuella 0,50 m.</div>
         </div>
         <div class="field">
           <label>Tipo de borde</label>
@@ -559,7 +564,34 @@ function clp(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
 /* =======================================================================
    ADICIONALES (opcionales, checkbox)
    ======================================================================= */
-function adicionalesList(areaDes){
+function calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi){
+  const largo=3, ancho=3, espesorLosa=0.20, espesorMuro=0.20;
+  const perimetro=2*(largo+ancho); // 12 m
+  const volumenLosa=largo*ancho*espesorLosa; // 1,80 m3
+  const volumenMuros=profJacuzzi>0 ? perimetro*profJacuzzi*espesorMuro : 0;
+  const areaAsiento=(largo*ancho)-((largo-1)*(ancho-1)); // 9 - 4 = 5 m2
+  const volumenAsiento=areaAsiento*0.50; // 2,50 m3
+  const volumenHormigon=volumenLosa+volumenMuros+volumenAsiento;
+  const hub=ciudadInfo?.hub || "Puerto Montt";
+  const precioArido=ARIDOS_HUB[hub] ?? 38000;
+  const precioHormigon=(HORMIGON_HUB_UF[hub] ?? 3.92)*valorUFActual;
+  const precioCemento=CEMENTO_HUB[hub] ?? 5420;
+  let costoMaterialHormigon=0, sacosCemento=0;
+  if(tipoLosa==="camion"){
+    costoMaterialHormigon=volumenHormigon*precioHormigon;
+  }else{
+    sacosCemento=Math.ceil(volumenHormigon*RATIOS.cementoSacosPorM3Arido);
+    costoMaterialHormigon=(volumenHormigon*precioArido)+(sacosCemento*precioCemento);
+  }
+  return {
+    largo,ancho,profundidad:profJacuzzi,perimetro,espesorLosa,espesorMuro,
+    volumenLosa,volumenMuros,areaAsiento,volumenAsiento,volumenHormigon,
+    sacosCemento,costoMaterialHormigon,manoObra:2700000,
+    total:2700000+costoMaterialHormigon
+  };
+}
+
+function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi30=0){
   return [
     {id:"diamond", grupo:"Terminación y aislación", label:"Revestimiento Diamond Brite", precio: 65000*areaDes},
     {id:"poliuretano", grupo:"Terminación y aislación", label:"Aislación de muros en poliuretano 2,5 cm", precio: 14000*areaDes},
@@ -569,7 +601,7 @@ function adicionalesList(areaDes){
     {id:"robot", grupo:"Tratamiento y limpieza", label:"Robot limpiafondo Zodiac", precio: 990000},
     {id:"manta", grupo:"Confort", label:"Manta térmica", precio: 250000},
     {id:"jacuzzi25", grupo:"Jacuzzi", label:"Jacuzzi 2,5 × 2,5 m", precio: 2000000},
-    {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m", precio: 2700000},
+    {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m · MO $2.700.000 + materiales calculados", precio: calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).total},
   ];
 }
 
@@ -595,6 +627,7 @@ function validarCotizacion(){
   if(largo<=0 || ancho<=0) errores.push("Largo y ancho deben ser mayores que cero.");
   if(pmin<=0 || pmax<=0) errores.push("Las profundidades deben ser mayores que cero.");
   if(pmax<pmin) errores.push("La profundidad máxima no puede ser menor que la mínima.");
+  if(adicionalesState.jacuzzi30 && !(parseFloat($("profJacuzzi30")?.value)>0)) errores.push("Ingresa la profundidad del Jacuzzi 3 × 3 para calcular sus muros.");
   const box=$("validationMsg");
   if(box){ box.textContent=errores.join(" "); box.classList.toggle("show", errores.length>0); }
   return errores.length===0;
@@ -639,12 +672,13 @@ function render(){
   const incGastos=$("incGastos").checked;
   const numFocos=Math.max(0, parseInt($("numFocos").value)||0);
   const plazo=$("plazo").value.trim() || "Por definir";
+  const profJacuzzi30=parseFloat($("profJacuzzi30")?.value)||0;
   validarCotizacion();
 
   $("cityTag").textContent=`${ciudadInfo.ciudad} · Hub ${ciudadInfo.hub}`;
 
   const r=calcular({largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa});
-  ultimoResultado = {r,largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,numFocos,plazo,quoteId};
+  ultimoResultado = {r,largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,numFocos,plazo,profJacuzzi30,quoteId};
 
   drawPool(largo,ancho,profMin,profMax);
   $("stSup").textContent=r.sup.toFixed(1);
@@ -656,7 +690,7 @@ function render(){
   const addWrap=$("adicionales");
   addWrap.innerHTML="";
   addWrap.className="add-groups";
-  const adds=adicionalesList(r.areaDes);
+  const adds=adicionalesList(r.areaDes,ciudadInfo,tipoLosa,profJacuzzi30);
   const grupos=[...new Set(adds.map(a=>a.grupo))];
   grupos.forEach(grupo=>{
     const box=document.createElement("div");
@@ -664,10 +698,14 @@ function render(){
     box.innerHTML=`<div class="add-group-title">${grupo}</div>`;
     adds.filter(a=>a.grupo===grupo).forEach(a=>{
       if(!(a.id in adicionalesState)) adicionalesState[a.id]=false;
+      if(a.id==="jacuzzi30"){
+        const jf=$("jacuzziProfField");
+        if(jf) jf.style.display=adicionalesState.jacuzzi30?"block":"none";
+      }
       const row=document.createElement("div"); row.className="toggle-row";
       row.innerHTML=`<span class="add-label">${a.label}</span>
         <div class="add-control">
-          <span class="price">${clp(a.precio)}</span>
+          <span class="price">${a.id==="jacuzzi30" && profJacuzzi30>0 ? clp(a.precio)+" · "+calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).volumenHormigon.toFixed(2)+" m³ hormigón" : clp(a.precio)}</span>
           <label class="switch"><input type="checkbox" data-id="${a.id}" ${adicionalesState[a.id]?"checked":""}><span class="slider"></span></label>
         </div>`;
       box.appendChild(row);
@@ -748,7 +786,7 @@ function generarPdfCliente(returnHtml=false){
   const r=u.r;
   const cliente=$('cliente').value.trim() || 'Cliente';
   const proyecto=$('tipoProyecto').value;
-  const adds=adicionalesList(r.areaDes).filter(a=>adicionalesState[a.id]);
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
   const addTotal=adds.reduce((s,a)=>s+a.precio,0);
   const totalBase=(r.nivel1Subtotal+addTotal)*(1+u.margen/100);
   const totalCalor=(r.nivel2Subtotal+addTotal)*(1+u.margen/100);
@@ -859,7 +897,7 @@ async function crearArchivoPdfCliente(){
   const u=ultimoResultado, r=u.r;
   const cliente=($('cliente').value.trim() || "Cliente");
   const proyecto=$('tipoProyecto').value;
-  const adds=adicionalesList(r.areaDes).filter(a=>adicionalesState[a.id]);
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
   const addTotal=adds.reduce((sum,a)=>sum+a.precio,0);
   const factor=1+u.margen/100;
   const totalBase=(r.nivel1Subtotal+addTotal)*factor;
@@ -1336,7 +1374,7 @@ $("largo").addEventListener("input",syncQuickMeasure);
 $("ancho").addEventListener("input",syncQuickMeasure);
 syncQuickMeasure();
 
-["largo","ancho","profMin","profMax","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
+["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
   $(id).addEventListener("input",()=>{
     render();
   });
