@@ -1,0 +1,2 @@
+/* Configuración comercial acordada */
+window.PSConfig2026={retiroTierra:{esponjamiento:1.20,camionM3:12,precioViaje:100000},fleteSegundaCompraCemento:75000,anticipoMaestros:0.50,anticiposCliente:[50,60],jacuzzi:{'2.5x2.5':{manoObra:2000000},'3x3':{manoObra:2700000}},estructura:{losaM:.20,muroM:.20,asientoHuellaM:.50,asientoAlturaM:.50}};

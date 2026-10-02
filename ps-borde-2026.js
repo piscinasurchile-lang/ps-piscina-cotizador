@@ -1,0 +1,2 @@
+/* Borde/vereda rectangular: anillo exterior según figura actual rectangular. */
+window.PSBorde2026={rectangular(largo,ancho,anchoVereda=.60){const l=Number(largo)||0,a=Number(ancho)||0,w=Number(anchoVereda)||0;const m2=(l+2*w)*(a+2*w)-l*a,per=2*(l+a);return {m2,perimetro:per,revueltoM3:per*.15*w,cementoSacos:per*.15*w*12}}};

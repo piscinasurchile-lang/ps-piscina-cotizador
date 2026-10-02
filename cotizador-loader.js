@@ -1,0 +1,2 @@
+/* Loader ordenado */
+['ps-config-2026.js','cotizador-mejoras.js','ps-etapas-2026.js','ps-precios-2026.js','ps-borde-2026.js','ps-jacuzzi-calor-2026.js','ps-historial-2026.js','ps-pdf-interno-2026.js','ps-2026.js','cotizador-ui-mejoras.js','cotizador-integracion.js'].forEach(src=>{const s=document.createElement('script');s.src=src+'?v=20261002';s.async=false;document.head.appendChild(s)});

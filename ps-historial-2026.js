@@ -1,0 +1,2 @@
+/* PiscinaSur · utilidades de historial detallado */
+window.PSHistorial2026={guardar(data){const k='ps_historial_detallado_v2';let a=[];try{a=JSON.parse(localStorage.getItem(k)||'[]')}catch(e){}const item={id:'PS-'+Date.now(),fecha:new Date().toISOString(),...data};a.push(item);localStorage.setItem(k,JSON.stringify(a));return item},listar(){try{return JSON.parse(localStorage.getItem('ps_historial_detallado_v2')||'[]')}catch(e){return[]}}};
