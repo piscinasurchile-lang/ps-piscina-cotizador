@@ -1,0 +1,18 @@
+# Checklist antes de producción
+- [x] Motor losa 20 cm y exclusión manual/camión
+- [x] Jacuzzi 2,5 y 3,0 con asiento 50×50
+- [x] Retiro de tierra
+- [x] Hidráulica inicial
+- [x] Anticipo 50/60 y utilidad proporcional
+- [x] Anticipo maestros 50%
+- [x] Cemento inicial/pendiente y flete $75.000
+- [x] Incidencia por partida
+- [x] Modelo precios editables
+- [x] Borde/vereda rectangular
+- [x] Modelo bomba calor jacuzzi
+- [x] Modelo PDF interno
+- [ ] Enlace loader en index.html
+- [ ] Render editable de partidas en interfaz
+- [ ] Generación real PDF interno jsPDF
+- [ ] Prueba visual en preview Vercel
+- [ ] Merge main / producción

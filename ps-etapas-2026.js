@@ -1,0 +1,2 @@
+/* Datos de etapa inicial PiscinaSur */
+window.PSEtapas2026={clasificar(nombre){const s=String(nombre).toLowerCase();if(/retro|excav|malla|fierro|cadena|pilar|cemento|arena|losa|skimmer|dreno|tuber|codo|terminal|tee/.test(s))return 'Obra gruesa / compra inicial';if(/filtro|bomba|carga filtrante/.test(s))return 'Equipamiento';if(/pintura|diamond|termin/.test(s))return 'Terminaciones';if(/flete|viático|gasto/.test(s))return 'Costos operacionales';return 'Instalaciones';}};

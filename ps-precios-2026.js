@@ -1,0 +1,2 @@
+/* Precio editable por partida: almacenamiento local por nombre/hub */
+window.PSPrecios2026={key:'ps_precios_editables_v2',leer(){try{return JSON.parse(localStorage.getItem(this.key)||'{}')}catch(e){return{}}},guardar(id,valor){const x=this.leer();x[id]=Number(valor)||0;localStorage.setItem(this.key,JSON.stringify(x));return x[id]},aplicar(materiales,hub){const x=this.leer();return materiales.map(m=>{const id=hub+'|'+m[0],p=x[id]??m[3];return [m[0],m[1],m[2],p,m[1]*p,m[5]]})}};

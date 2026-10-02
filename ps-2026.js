@@ -1,0 +1,2 @@
+/* Consolida módulos PiscinaSur 2026 para pruebas */
+window.PS2026={get reglas(){return window.PSReglas2026},get etapas(){return window.PSEtapas2026},get historial(){return window.PSHistorial2026},get precios(){return window.PSPrecios2026},get borde(){return window.PSBorde2026},get pdfInterno(){return window.PSPdfInterno2026},get calorJacuzzi(){return window.PSJacuzziCalor2026}};
