@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PS piscina</title>
+<style>
+  :root{
+    --navy-950:#080D17;
+    --navy-900:#0D1526;
+    --navy-800:#131E36;
+    --navy-700:#1B2A48;
+    --line:#233255;
+    --teal-400:#2DD4BF;
+    --teal-300:#7EEDE0;
+    --sand-100:#E9ECF3;
+    --slate-400:#8B96AC;
+    --slate-500:#657089;
+    --amber-400:#F0A83C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 1200px 800px at 15% -10%, #10203A 0%, var(--navy-950) 55%);
+    color:var(--sand-100);
+    font-family:'Calibri','Carlito','Segoe UI',Arial,sans-serif;
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:28px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:58px;height:58px;border-radius:10px;overflow:hidden;background:#0b0b0b;border:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .brand-mark img{width:100%;height:100%;object-fit:cover;object-position:center;}
+  @media (max-width:560px){.brand-mark{width:50px;height:50px} header{align-items:center}.tag{width:100%;text-align:center;margin-top:4px}}
+  h1{font-size:20px;letter-spacing:.04em;margin:0;text-transform:uppercase;font-weight:700;}
+  .brand small{display:block;color:var(--slate-400);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+  .tag{font-size:11px;color:var(--teal-300);border:1px solid rgba(45,212,191,.35);padding:4px 10px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase;background:rgba(45,212,191,.06);}
+
+  /* ---------- Layout ---------- */
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:26px;align-items:start;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:linear-gradient(180deg,var(--navy-900),var(--navy-800));border:1px solid var(--line);border-radius:14px;padding:22px;}
+  .panel + .panel{margin-top:20px;}
+  .panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--teal-300);margin:0 0 16px;font-weight:700;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--slate-400);margin-bottom:5px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+  input[type=text], input[type=number], select{
+    width:100%;background:var(--navy-950);border:1px solid var(--line);color:var(--sand-100);
+    padding:9px 10px;border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;
+  }
+  input:focus, select:focus{border-color:var(--teal-400);}
+  select{appearance:none;background-image:linear-gradient(45deg, transparent 50%, var(--slate-400) 50%),linear-gradient(135deg, var(--slate-400) 50%, transparent 50%);
+    background-position:calc(100% - 16px) calc(1em + 2px), calc(100% - 11px) calc(1em + 2px);background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+
+  .hint{font-size:11px;color:var(--slate-500);margin-top:4px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);}
+  .toggle-row:first-of-type{border-top:none;}
+  .toggle-row span{font-size:13px;color:var(--sand-100);}
+  .toggle-row .price{font-size:12.5px;color:var(--slate-400);font-variant-numeric:tabular-nums;}
+  .switch{position:relative;width:38px;height:22px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:var(--navy-950);border:1px solid var(--line);border-radius:20px;cursor:pointer;transition:.15s;}
+  .slider:before{content:"";position:absolute;width:16px;height:16px;left:2px;top:2px;background:var(--slate-400);border-radius:50%;transition:.15s;}
+  .switch input:checked + .slider{background:rgba(45,212,191,.18);border-color:var(--teal-400);}
+  .switch input:checked + .slider:before{transform:translateX(16px);background:var(--teal-400);}
+
+  /* ---------- Pool diagram (signature element) ---------- */
+  .pool-card{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+  .pool-svg-wrap{flex:0 0 auto;}
+  .pool-stats{flex:1;min-width:200px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .stat{border-left:2px solid var(--teal-400);padding-left:10px;}
+  .stat .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--sand-100);}
+  .stat .l{font-size:10.5px;color:var(--slate-400);text-transform:uppercase;letter-spacing:.06em;margin-top:1px;}
+
+  /* ---------- Tiers ---------- */
+  .tiers{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:640px;}
+  @media (max-width:760px){.tiers{grid-template-columns:1fr;}}
+  .tier{background:var(--navy-950);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;}
+  .tier.reco{border-color:var(--teal-400);box-shadow:0 0 0 1px var(--teal-400), 0 12px 30px -12px rgba(45,212,191,.35);position:relative;}
+  .reco-badge{position:absolute;top:-11px;left:16px;background:var(--teal-400);color:var(--navy-950);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;}
+  .tier .name{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-400);margin-bottom:6px;}
+  .tier .total{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--sand-100);margin-bottom:2px;}
+  .tier .sub{font-size:11.5px;color:var(--slate-500);margin-bottom:14px;}
+  .tier ul{list-style:none;margin:0;padding:0;flex:1;}
+  .tier li{font-size:12.5px;color:var(--slate-400);padding:5px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;}
+  .tier li:first-child{border-top:none;}
+  .tier li b{color:var(--sand-100);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  details{margin-top:20px;}
+  summary{cursor:pointer;font-size:12.5px;color:var(--teal-300);letter-spacing:.03em;user-select:none;}
+  .breakdown{margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .breakdown table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .breakdown th{text-align:left;background:var(--navy-800);color:var(--slate-400);font-weight:600;padding:8px 10px;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;}
+  .breakdown td{padding:6px 10px;border-top:1px solid var(--line);color:var(--sand-100);}
+  .breakdown td.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--slate-400);}
+  .breakdown tr.section td{background:var(--navy-900);color:var(--teal-300);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;}
+  .breakdown tr.total td{background:var(--navy-800);font-weight:700;color:var(--sand-100);}
+
+  .pdf-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .pdf-btn{border:0;border-radius:9px;padding:11px 16px;background:var(--teal-400);color:var(--navy-950);font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;}
+  .pdf-btn:hover{filter:brightness(1.06);}
+  .wa-btn{border:0;border-radius:9px;padding:11px 16px;background:#25D366;color:#07150D;font-weight:700;font-family:inherit;font-size:13px;cursor:pointer;}
+  .wa-btn:hover{filter:brightness(1.06);}
+
+  footer{margin-top:26px;text-align:center;color:var(--slate-500);font-size:11.5px;}
+
+  /* ===== V7 · Gris hielo + azul petróleo ===== */
+  :root{
+    --ice:#EEF4F6;--ice-2:#F6F9FA;--card:#FFFFFF;--petrol:#0B5E6B;--petrol-dark:#084A55;
+    --ink:#173247;--muted:#6B7D89;--border:#C9D9DE;--soft:#DDE9EC;--green:#1FAF63;
+  }
+  body{background:linear-gradient(180deg,#E9F1F3 0%,#F4F8F9 100%);color:var(--ink);}
+  header{border-bottom-color:var(--border);}
+  h1{color:var(--ink);}
+  .brand small{color:var(--muted);}
+  .brand-mark{border-color:var(--border);background:#fff;}
+  .tag{color:var(--petrol);border-color:#9BC4CB;background:#E4F1F3;font-weight:700;}
+  .panel{background:var(--card);border-color:var(--border);box-shadow:0 6px 22px rgba(23,50,71,.06);}
+  .panel h2{color:var(--petrol);}
+  .field label,.hint,.stat .l,.tier .name,.tier .sub,.tier li,.toggle-row .price,footer{color:var(--muted);}
+  input[type=text],input[type=number],select{background:#F9FBFC;border-color:var(--border);color:var(--ink);}
+  input:focus,select:focus{border-color:var(--petrol);box-shadow:0 0 0 3px rgba(11,94,107,.10);}
+  select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);}
+  .toggle-row{border-top-color:var(--soft);}.toggle-row span{color:var(--ink);}
+  .slider{background:#D9E4E7;border-color:#B9CDD2}.slider:before{background:#7D929B}.switch input:checked + .slider{background:#CFE7E9;border-color:var(--petrol)}.switch input:checked + .slider:before{background:var(--petrol)}
+  .stat{border-left-color:var(--petrol)}.stat .v{color:var(--ink)}
+  .tier{background:#F8FBFC;border-color:var(--border)}.tier.reco{border-color:var(--petrol);box-shadow:0 0 0 1px var(--petrol),0 10px 25px -16px rgba(11,94,107,.45)}
+  .reco-badge{background:var(--petrol);color:white}.tier .total,.tier li b{color:var(--ink)}.tier li{border-top-color:var(--soft)}
+  summary{color:var(--petrol);font-weight:700}.breakdown{border-color:var(--border)}.breakdown th{background:#E8F0F2;color:var(--muted)}.breakdown td{border-top-color:var(--soft);color:var(--ink)}.breakdown td.num{color:var(--muted)}.breakdown tr.section td{background:#EDF5F6;color:var(--petrol)}.breakdown tr.total td{background:#E4EEF0;color:var(--ink)}
+  .pdf-btn{background:var(--petrol);color:#fff}.wa-btn{background:var(--green);color:#fff}
+  .quick-measures{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:7px}
+  .measure-btn{border:1px solid var(--petrol);background:var(--petrol-dark);color:#fff;border-radius:9px;padding:10px 6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;transition:.15s}
+  .measure-btn:hover,.measure-btn.active{background:var(--petrol);color:#fff;transform:translateY(-1px)}
+  @media(max-width:520px){body{padding:14px 10px 36px}.panel{padding:16px}.quick-measures{grid-template-columns:repeat(2,1fr)}.pdf-actions{display:grid;grid-template-columns:1fr}.pdf-btn,.wa-btn{width:100%;padding:13px}.pool-svg-wrap{width:100%;text-align:center}.row2{gap:8px}}
+
+
+
+  .add-groups{display:grid;gap:14px}
+  .add-group{border:1px solid var(--soft);border-radius:12px;overflow:hidden;background:#fbfdfe}
+  .add-group-title{padding:10px 12px;background:#edf5f6;color:var(--petrol);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.25px}
+  .add-group .toggle-row{padding:11px 12px;gap:12px}
+  .add-label{min-width:0;line-height:1.25}
+  .add-control{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  @media(max-width:520px){.add-group .toggle-row{align-items:flex-start}.add-control{flex-direction:column;align-items:flex-end;gap:6px}.add-group .toggle-row .price{font-size:12px;font-weight:700;white-space:nowrap}.add-label{font-size:13px}}
+
+  .validation{display:none;margin:0 0 14px;padding:10px 12px;border-radius:9px;background:#fff4e5;border:1px solid #e4b96c;color:#714b12;font-size:12.5px;}
+  .validation.show{display:block;}
+  .quote-id{font-size:11px;color:var(--slate-500);margin-top:5px;}
+
+  .saved-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
+  .saved-tools input{min-width:0}
+  .saved-list{display:grid;gap:10px;margin-top:12px}
+  .saved-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+  .saved-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .saved-name{font-weight:800;color:var(--petrol)}
+  .saved-meta{font-size:12px;color:var(--slate-500);margin-top:3px}
+  .saved-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .saved-actions button{border:0;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .btnSavedDownload{background:var(--petrol);color:#fff}
+  .btnSavedShare{background:#168c62;color:#fff}
+  .btnSavedDelete{background:#fff0f0;color:#a33;border:1px solid #efd0d0!important}
+  .saved-empty{font-size:13px;color:var(--slate-500);padding:8px 0}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark"><img src="icon.svg" alt="PS piscina"></div>
+      <div>
+        <h1>Cotizador Piscinas</h1>
+        <small>PiscinaSur Chile — motor interno de presupuesto</small>
+      </div>
+    </div>
+    <div class="tag" id="cityTag">Puerto Montt · Hub Puerto Montt</div>
+    <div class="tag" id="ufTag" style="margin-top:6px;">UF: cargando…</div>
+  </header>
+
+  <div class="grid">
+    <!-- ===== LEFT: FORM ===== -->
+    <div>
+      <div class="panel">
+        <h2>Datos del cliente y proyecto</h2>
+        <div class="field">
+          <label>Nombre del cliente</label>
+          <input type="text" id="cliente" value="Nombre Apellido">
+          <div class="quote-id">Presupuesto: <b id="quoteId">—</b></div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Tipo de proyecto</label>
+            <select id="tipoProyecto">
+              <option>Particular</option>
+              <option>Comercial</option>
+              <option>Publica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ciudad del proyecto</label>
+            <select id="ciudad"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Medidas de la piscina</h2>
+        <div class="validation" id="validationMsg"></div>
+        <div class="field">
+          <label>Medidas rápidas</label>
+          <div class="quick-measures" aria-label="Medidas rápidas">
+            <button type="button" class="measure-btn" data-largo="7" data-ancho="3">3 × 7 m</button>
+            <button type="button" class="measure-btn" data-largo="8" data-ancho="4">4 × 8 m</button>
+            <button type="button" class="measure-btn" data-largo="10" data-ancho="4">4 × 10 m</button>
+            <button type="button" class="measure-btn" data-largo="10" data-ancho="5">5 × 10 m</button>
+          </div>
+          <div class="hint">Selecciona una medida habitual o escribe una medida personalizada abajo.</div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Largo (m)</label><input type="number" id="largo" value="7" step="0.1"></div>
+          <div class="field"><label>Ancho (m)</label><input type="number" id="ancho" value="3" step="0.1"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Profundidad mín. (m)</label><input type="number" id="profMin" value="1.2" step="0.1"></div>
+          <div class="field"><label>Profundidad máx. (m)</label><input type="number" id="profMax" value="1.7" step="0.1"></div>
+        </div>
+        <div class="field">
+          <label>Tipo de losa</label>
+          <select id="tipoLosa">
+            <option value="mano">A mano (revuelto fino)</option>
+            <option value="camion">Con camión (hormigón)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Espesor de losa (m) — manual</label>
+          <input type="number" id="espesorLosa" value="0.20" step="0.01">
+        </div>
+        <div class="field" id="jacuzziProfField" style="display:none">
+          <label>Profundidad Jacuzzi 3 × 3 (m)</label>
+          <input type="number" id="profJacuzzi30" value="" min="0.5" step="0.05" placeholder="Ingresar profundidad">
+          <div class="hint">Necesaria para calcular muros. Asiento perimetral fijo: huella 0,50 m × contrahuella 0,50 m.</div>
+        </div>
+        <div class="field">
+          <label>Tipo de borde</label>
+          <select id="tipoBorde">
+            <option>Normal</option>
+            <option>Infinito</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Número de focos LED</label>
+          <input type="number" id="numFocos" value="3" min="0" step="1">
+          <div class="hint">Editable según el diseño acordado con el cliente.</div>
+        </div>
+        <div class="field">
+          <label>Plazo estimado de ejecución</label>
+          <input type="text" id="plazo" value="25–30 días">
+          <div class="hint">Editable para cada proyecto y visible en el PDF del cliente.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Margen y gastos internos</h2>
+        <div class="field">
+          <label>% Utilidad + gastos generales</label>
+          <input type="number" id="margen" value="20" step="1">
+          <div class="hint">El flete por distancia queda fuera de esta versión hasta definir el criterio definitivo.</div>
+        </div>
+        <div class="toggle-row" style="border-top:1px solid var(--line);margin-top:10px;padding-top:12px;">
+          <span>Gastos generales / viáticos fijos</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="price">$750.000</span>
+            <label class="switch"><input type="checkbox" id="incGastos"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Adicionales (opcionales)</h2>
+        <div id="adicionales"></div>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT: RESULTS ===== -->
+    <div>
+      <div class="panel pool-card">
+        <div class="pool-svg-wrap">
+          <svg id="poolSvg" width="220" height="170" viewBox="0 0 220 170"></svg>
+        </div>
+        <div class="pool-stats">
+          <div class="stat"><div class="v" id="stSup">—</div><div class="l">Superficie m²</div></div>
+          <div class="stat"><div class="v" id="stVol">—</div><div class="l">Volumen m³</div></div>
+          <div class="stat"><div class="v" id="stPer">—</div><div class="l">Perímetro m</div></div>
+          <div class="stat"><div class="v" id="stDes">—</div><div class="l">Área desarrollo m²</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Propuesta técnico-económica</h2>
+        <div class="tiers" id="tiers"></div>
+
+        <details>
+          <summary>Ver desglose de costos (materiales + mano de obra) →</summary>
+          <div class="breakdown" id="breakdown"></div>
+        </details>
+        <div class="pdf-actions">
+          <button class="pdf-btn" type="button" id="btnPdfCliente">Generar PDF para cliente</button>
+          <button class="wa-btn" type="button" id="btnWhatsApp">Compartir PDF por WhatsApp</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Historial y estudio de mercado</h2>
+        <div class="pool-stats" id="statsHistorial" style="grid-template-columns:1fr 1fr;margin-bottom:14px;"></div>
+        <details open>
+          <summary>Ver cotizaciones registradas →</summary>
+          <div id="listaHistorial" style="margin-top:12px;"></div>
+        </details>
+        <div class="hint" style="margin-top:10px;">Cada vez que generas un PDF o compartes por WhatsApp, la cotización queda registrada aquí como "Pendiente". Marca el estado cuando el cliente responda — esto es lo que te permite medir cuántos presupuestos se aceptan y ejecutan en la temporada.</div>
+      </div>
+
+      <div class="panel">
+        <h2>PDF guardados por cliente</h2>
+        <div class="hint">Cada PDF generado queda guardado en este teléfono. Búscalo por nombre del cliente para volver a descargarlo o compartirlo.</div>
+        <div class="saved-tools">
+          <input type="search" id="buscarPdfCliente" placeholder="Buscar cliente…" autocomplete="off">
+          <button type="button" id="btnVerTodosPdf" class="pdf-btn" style="padding:10px 14px;">Ver todos</button>
+        </div>
+        <div id="listaPdfGuardados" class="saved-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>PiscinaSur Chile · PS piscina V8.20 · @piscinaSur.chile</footer>
+</div>
+
+<script>
+/* =======================================================================
+   DATOS BASE (extraídos del Excel "Presupuesto dinámico piscinas")
+   ======================================================================= */
+const CIUDADES = [
+  {ciudad:"Los Angeles", hub:"Temuco"},
+  {ciudad:"Chillan", hub:"Temuco"},
+  {ciudad:"Pucon", hub:"Villarrica"},
+  {ciudad:"Villarrica", hub:"Villarrica"},
+  {ciudad:"Lican Ray", hub:"Villarrica"},
+  {ciudad:"Panguipulli", hub:"Valdivia"},
+  {ciudad:"Ranco", hub:"Valdivia"},
+  {ciudad:"Temuco", hub:"Temuco"},
+  {ciudad:"Osorno", hub:"Osorno"},
+  {ciudad:"Valdivia", hub:"Valdivia"},
+  {ciudad:"Los Muermos", hub:"Puerto Montt"},
+  {ciudad:"Ensenada", hub:"Puerto Montt"},
+  {ciudad:"Fresia", hub:"Puerto Montt"},
+  {ciudad:"Puerto Varas", hub:"Puerto Montt"},
+  {ciudad:"Puerto Montt", hub:"Puerto Montt"},
+  {ciudad:"Frutillar", hub:"Puerto Montt"},
+];
+
+const CEMENTO_HUB   = {Temuco:4790, Villarrica:4590, Valdivia:5170, "Los Muermos":5420, Osorno:5420, "Puerto Montt":5420, "Puerto Varas":5420};
+const MALLA_HUB     = {Temuco:23990, Villarrica:23990, Valdivia:23990, "Los Muermos":23990, Osorno:23990, "Puerto Montt":23990, "Puerto Varas":23990};
+const ARIDOS_HUB    = {Temuco:38000, Villarrica:38000, Valdivia:38000, "Los Muermos":38000, "Puerto Varas":38000, Osorno:38000, "Puerto Montt":38000};
+// PENDIENTE: valores en UF/m3 aproximados, calculados desde los precios CLP previos a un valor UF de referencia (~$40.850, ago-2026).
+// Reemplazar por las cifras reales que Melón cotice en UF para cada zona (Temuco, Villarrica, Ensenada, Los Muermos, Fresia, etc).
+const HORMIGON_HUB_UF = {Temuco:3.92, Villarrica:3.92, Valdivia:4.39, "Los Muermos":4.39, "Puerto Varas":3.70, Osorno:4.03, "Puerto Montt":3.70};
+
+const MANO_OBRA_TIERS = [
+  {tam:"5x3", m2:15, valor:4500000},{tam:"6x3", m2:18, valor:4800000},{tam:"7x4", m2:28, valor:5000000},
+  {tam:"8x4", m2:32, valor:5500000},{tam:"9x4", m2:36, valor:5800000},{tam:"10x4", m2:40, valor:6000000},
+  {tam:"11x5", m2:55, valor:6500000},{tam:"12x6", m2:72, valor:7000000},
+];
+
+const BOMBA_CALOR_TIERS = [
+  {hasta:20, equipo:1300000, flete:60000},{hasta:35, equipo:1500000, flete:60000},{hasta:50, equipo:1700000, flete:60000},
+  {hasta:70, equipo:1899000, flete:60000},{hasta:90, equipo:2990000, flete:60000},
+];
+const BOMBA_CALOR_INSTALACION = 380000;
+
+const RATIOS = {
+  cementoSacosPorM3Arido:15, mallaM2PorMalla:8, cadenaMPorCadena:3, fierroMlPorM2Des:4, fierroTiraM:6,
+  arenaGruesaM3PorM3:0.4288, revueltoFinoM3PorM3:0.2339, espesorLosaM:0.15, pilarEspaciamientoM:3,
+  pilarPrecioUd:45000, pinturaBordePrecioMl:8000, cadenaPrecioUd:15000, fierroTiraPrecioUd:3790,
+  sobrecostoBordeInfinitoM2:150000, estanqueCompensadorFijo:2200000, umbralFiltroBombaM3:48,
+  kitFleteTemucoPtoMontt:80000, filtroBC50:181000, bombaBC1hp:155000, filtroBC100:240000, bomba15hp:243000,
+  cargaFiltrantePrecioSaco:13590, cargaSacosChico:6, cargaSacosGrande:10,
+};
+
+const MARGEN_DEFAULT = 0.25;
+
+/* =======================================================================
+   VALOR UF DEL DÍA — el hormigón se cotiza en UF/m3, no en pesos fijos.
+   Se intenta obtener el valor oficial del día (mindicador.cl, Banco Central).
+   Si no hay conexión (uso en terreno), se usa el último valor guardado en
+   este dispositivo; si tampoco existe, se usa una referencia fija (puede
+   estar desactualizada — se avisa en pantalla).
+   ======================================================================= */
+const UF_REFERENCIA_FIJA = {valor:40850.06, fecha:"13-08-2026"}; // respaldo si nunca hubo conexión
+let valorUFActual = UF_REFERENCIA_FIJA.valor;
+let valorUFFecha = UF_REFERENCIA_FIJA.fecha;
+let valorUFEsCache = true;
+
+function pintarUfTag(){
+  const tag = $("ufTag");
+  if(!tag) return;
+  if(valorUFEsCache){
+    tag.textContent = `UF: $${valorUFActual.toLocaleString("es-CL",{maximumFractionDigits:2})} (${valorUFFecha} · sin conexión, puede estar vieja)`;
+    tag.style.background = "#fff4e5";
+    tag.style.color = "#714b12";
+    tag.style.borderColor = "#e4b96c";
+  } else {
+    tag.textContent = `UF: $${valorUFActual.toLocaleString("es-CL",{maximumFractionDigits:2})} (${valorUFFecha})`;
+    tag.style.background = "";
+    tag.style.color = "";
+    tag.style.borderColor = "";
+  }
+}
+
+async function obtenerValorUF(){
+  // 1) intenta cargar lo último guardado en este dispositivo, para tener algo mientras llega la red
+  try{
+    const cache = JSON.parse(localStorage.getItem("ps_uf_cache") || "null");
+    if(cache && cache.valor && cache.fecha){
+      valorUFActual = cache.valor;
+      valorUFFecha = cache.fecha;
+      valorUFEsCache = true;
+      pintarUfTag();
+      render();
+    }
+  }catch(e){}
+
+  // 2) intenta traer el valor oficial del día
+  try{
+    const res = await fetch("https://mindicador.cl/api/uf");
+    if(!res.ok) throw new Error("respuesta no OK");
+    const data = await res.json();
+    const serie = data && data.serie && data.serie[0];
+    if(!serie || !serie.valor) throw new Error("sin datos");
+    valorUFActual = serie.valor;
+    valorUFFecha = new Date(serie.fecha).toLocaleDateString("es-CL");
+    valorUFEsCache = false;
+    localStorage.setItem("ps_uf_cache", JSON.stringify({valor:valorUFActual, fecha:valorUFFecha}));
+    pintarUfTag();
+    render();
+  }catch(e){
+    // sin conexión: se queda con el valor cacheado (o la referencia fija) ya pintado arriba
+    pintarUfTag();
+  }
+}
+
+/* =======================================================================
+   MOTOR DE CÁLCULO
+   ======================================================================= */
+function calcular(input){
+  const {largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa} = input;
+  const sup = largo*ancho;
+  const per = 2*(largo+ancho);
+  const profProm = (profMin+profMax)/2;
+  const vol = sup*profProm;
+  const areaDes = per*profProm + sup;
+
+  const hub = ciudadInfo.hub;
+  const precioCemento = CEMENTO_HUB[hub] ?? 5420;
+  const precioMalla   = MALLA_HUB[hub] ?? 23990;
+  const precioArido   = ARIDOS_HUB[hub] ?? 38000;
+  const precioHormigon= (HORMIGON_HUB_UF[hub] ?? 3.92) * valorUFActual;
+
+  const arenaGruesa = round1(vol*RATIOS.arenaGruesaM3PorM3);
+  const arenaFina = 0;
+  // Losa (piso piscina): A MANO o CON CAMIÓN son excluyentes — nunca se suman ambas
+  const volumenLosa = largo*ancho*espesorLosa;
+  const losaMano   = tipoLosa==="mano"   ? volumenLosa : 0;
+  const losaCamion = tipoLosa==="camion" ? volumenLosa : 0;
+  const sacosCemento = Math.round(RATIOS.cementoSacosPorM3Arido*(arenaGruesa+arenaFina+losaMano));
+  const mallaUd = Math.ceil(areaDes/RATIOS.mallaM2PorMalla);
+  const cadenaUd = Math.ceil(per/RATIOS.cadenaMPorCadena);
+  const fierroTiras = Math.ceil((areaDes*RATIOS.fierroMlPorM2Des)/RATIOS.fierroTiraM);
+  const pilaresUd = Math.ceil(per/RATIOS.pilarEspaciamientoM);
+  const bordeInfinitoSobrecosto = borde==="Infinito" ? sup*RATIOS.sobrecostoBordeInfinitoM2 : 0;
+  const bordeInfinitoEstanque   = borde==="Infinito" ? RATIOS.estanqueCompensadorFijo : 0;
+
+  const materiales = [
+    ["Arena gruesa (muros)", arenaGruesa, "m3", precioArido, arenaGruesa*precioArido, "HORMIGONES PISCINA"],
+    tipoLosa==="mano"
+      ? ["Losa a mano (revuelto fino) — Largo×Ancho×Espesor", losaMano, "m3", precioArido, losaMano*precioArido, "HORMIGONES PISCINA"]
+      : ["Losa con camión (hormigón Melón) — Largo×Ancho×Espesor", losaCamion, "m3", precioHormigon, losaCamion*precioHormigon, "HORMIGONES PISCINA"],
+    ["Sacos cemento (15 sacos/m3 árido)", sacosCemento, "ud", precioCemento, sacosCemento*precioCemento, "HORMIGONES PISCINA"],
+    ["Malla ACMA C-92", mallaUd, "ud", precioMalla, mallaUd*precioMalla, "HORMIGONES PISCINA"],
+    ["Cadenas", cadenaUd, "ud", RATIOS.cadenaPrecioUd, cadenaUd*RATIOS.cadenaPrecioUd, "HORMIGONES PISCINA"],
+    ["Fierro 8mm (tiras 6m)", fierroTiras, "tiras", RATIOS.fierroTiraPrecioUd, fierroTiras*RATIOS.fierroTiraPrecioUd, "HORMIGONES PISCINA"],
+    ["Pilares estructurales", pilaresUd, "ud", RATIOS.pilarPrecioUd, pilaresUd*RATIOS.pilarPrecioUd, "HORMIGONES PISCINA"],
+    ["Pintura borde piscina", 1, "gl", per*RATIOS.pinturaBordePrecioMl, per*RATIOS.pinturaBordePrecioMl, "HORMIGONES PISCINA"],
+    ["Sobrecosto borde infinito", 1, "gl", bordeInfinitoSobrecosto, bordeInfinitoSobrecosto, "HORMIGONES PISCINA"],
+    ["Estanque compensador (borde infinito)", 1, "gl", bordeInfinitoEstanque, bordeInfinitoEstanque, "HORMIGONES PISCINA"],
+    ["Retroexcavadora (8 hrs)", 8, "hr", 38000, 8*38000, "HORMIGONES PISCINA"],
+  ];
+
+  const filtroGrande = vol>=RATIOS.umbralFiltroBombaM3;
+  const precioFiltro = filtroGrande?RATIOS.filtroBC100:RATIOS.filtroBC50;
+  const precioBomba  = filtroGrande?RATIOS.bomba15hp:RATIOS.bombaBC1hp;
+  const sacosCarga    = filtroGrande?RATIOS.cargaSacosGrande:RATIOS.cargaSacosChico;
+
+  materiales.push(
+    ["Filtro "+(filtroGrande?"BC100":"BC50"), 1, "ud", precioFiltro, precioFiltro, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Bomba "+(filtroGrande?"1.5HP":"1HP"), 1, "ud", precioBomba, precioBomba, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Carga filtrante arena cuarzo", sacosCarga, "sacos", RATIOS.cargaFiltrantePrecioSaco, sacosCarga*RATIOS.cargaFiltrantePrecioSaco, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Flete kit bomba+filtro (fijo)", 1, "gl", RATIOS.kitFleteTemucoPtoMontt, RATIOS.kitFleteTemucoPtoMontt, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Skimmer boca ancha", 1, "ud", 62000, 62000, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Sumideros / drenos", 1, "ud", 12000, 12000, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Boquillas", 4, "ud", 8000, 32000, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Válvulas PVC", 2, "ud", 19300, 38600, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Fitting hidráulico (codos, tee, terminales, tubería, pegamento)", 1, "gl", 128800+14637+4300+6600+2590+182280+44730, 128800+14637+4300+6600+2590+182280+44730, "FITTING HIDRÁULICO"],
+    ["Eléctrico (tablero, conduit, cable, focos LED, tierra, pedestal)", 1, "gl", 157000+12100+3927+73800+10600+21000+261000+45000, 157000+12100+3927+73800+10600+21000+261000+45000, "ELÉCTRICO Y OTROS"],
+    ["Borde piscina 40x40/50 (piedra + flete + pegamento)", 1, "gl", 312000+380000+123600, 312000+380000+123600, "BORDE PISCINA"],
+    ["Terminaciones / pinturas", 1, "gl", 260000+18500+5400, 260000+18500+5400, "TERMINACIONES"],
+  );
+
+  const totalMateriales = materiales.reduce((s,m)=>s+m[4],0);
+
+  // mano de obra por tramo
+  const tierMO = pickTier(MANO_OBRA_TIERS, sup);
+  const manoObraConstruccion = tierMO.valor;
+  const gastosGeneralesFijos = incGastos ? 750000 : 0; // gastos generales/viáticos — ahora opcional
+  const totalManoObra = manoObraConstruccion + gastosGeneralesFijos;
+
+  const totalNeto = totalMateriales + totalManoObra;
+
+  // Nivel 2: + bomba de calor
+  const bcTier = BOMBA_CALOR_TIERS.find(t=>vol<=t.hasta) || BOMBA_CALOR_TIERS[BOMBA_CALOR_TIERS.length-1];
+  const bcEquipo = bcTier.equipo, bcFlete = bcTier.flete, bcInstalacion = BOMBA_CALOR_INSTALACION;
+
+  const nivel1Subtotal = totalNeto;
+  const nivel2Subtotal = totalNeto + bcEquipo + bcFlete + bcInstalacion;
+
+  const mk = margen/100;
+  const nivel1Total = nivel1Subtotal*(1+mk);
+  const nivel2Total = nivel2Subtotal*(1+mk);
+
+  return {
+    sup, per, vol, areaDes, materiales, totalMateriales, totalManoObra, totalNeto, tierMO,
+    bcTier, bcEquipo, bcFlete, bcInstalacion,
+    nivel1Subtotal, nivel2Subtotal, nivel1Total, nivel2Total, mk,
+  };
+}
+
+function pickTier(tiers, sup){
+  const sorted = [...tiers].sort((a,b)=>a.m2-b.m2);
+  for(const t of sorted){ if(sup<=t.m2) return t; }
+  return sorted[sorted.length-1];
+}
+function round1(n){ return Math.round(n*10)/10; }
+function clp(n){ return "$"+Math.round(n).toLocaleString("es-CL"); }
+
+/* =======================================================================
+   ADICIONALES (opcionales, checkbox)
+   ======================================================================= */
+function calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi){
+  const largo=3, ancho=3, espesorLosa=0.20, espesorMuro=0.20;
+  const perimetro=2*(largo+ancho); // 12 m
+  const volumenLosa=largo*ancho*espesorLosa; // 1,80 m3
+  const volumenMuros=profJacuzzi>0 ? perimetro*profJacuzzi*espesorMuro : 0;
+  const areaAsiento=(largo*ancho)-((largo-1)*(ancho-1)); // 9 - 4 = 5 m2
+  const volumenAsiento=areaAsiento*0.50; // 2,50 m3
+  const volumenHormigon=volumenLosa+volumenMuros+volumenAsiento;
+  const hub=ciudadInfo?.hub || "Puerto Montt";
+  const precioArido=ARIDOS_HUB[hub] ?? 38000;
+  const precioHormigon=(HORMIGON_HUB_UF[hub] ?? 3.92)*valorUFActual;
+  const precioCemento=CEMENTO_HUB[hub] ?? 5420;
+  let costoMaterialHormigon=0, sacosCemento=0;
+  if(tipoLosa==="camion"){
+    costoMaterialHormigon=volumenHormigon*precioHormigon;
+  }else{
+    sacosCemento=Math.ceil(volumenHormigon*RATIOS.cementoSacosPorM3Arido);
+    costoMaterialHormigon=(volumenHormigon*precioArido)+(sacosCemento*precioCemento);
+  }
+  return {
+    largo,ancho,profundidad:profJacuzzi,perimetro,espesorLosa,espesorMuro,
+    volumenLosa,volumenMuros,areaAsiento,volumenAsiento,volumenHormigon,
+    sacosCemento,costoMaterialHormigon,manoObra:2700000,
+    total:2700000+costoMaterialHormigon
+  };
+}
+
+function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi30=0){
+  return [
+    {id:"diamond", grupo:"Terminación y aislación", label:"Revestimiento Diamond Brite", precio: 65000*areaDes},
+    {id:"poliuretano", grupo:"Terminación y aislación", label:"Aislación de muros en poliuretano 2,5 cm", precio: 14000*areaDes},
+    {id:"clorador", grupo:"Tratamiento y limpieza", label:"Clorador de sal Astral", precio: 890000},
+    {id:"ozono", grupo:"Tratamiento y limpieza", label:"Ozono UV / Ionizador", precio: 970000},
+    {id:"instClOz", grupo:"Tratamiento y limpieza", label:"Instalación de clorador u ozono", precio: 180000},
+    {id:"robot", grupo:"Tratamiento y limpieza", label:"Robot limpiafondo Zodiac", precio: 990000},
+    {id:"manta", grupo:"Confort", label:"Manta térmica", precio: 250000},
+    {id:"jacuzzi25", grupo:"Jacuzzi", label:"Jacuzzi 2,5 × 2,5 m", precio: 2000000},
+    {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m · MO $2.700.000 + materiales calculados", precio: calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).total},
+  ];
+}
+
+/* =======================================================================
+   UI
+   ======================================================================= */
+const $ = id=>document.getElementById(id);
+const ciudadSel = $("ciudad");
+CIUDADES.forEach(c=>{
+  const o=document.createElement("option"); o.value=c.ciudad; o.textContent=c.ciudad; ciudadSel.appendChild(o);
+});
+ciudadSel.value="Puerto Montt";
+
+let adicionalesState = {};
+const nowQuote = new Date();
+const quoteId = `PS-${nowQuote.getFullYear()}${String(nowQuote.getMonth()+1).padStart(2,"0")}${String(nowQuote.getDate()).padStart(2,"0")}-${String(nowQuote.getHours()).padStart(2,"0")}${String(nowQuote.getMinutes()).padStart(2,"0")}`;
+if($("quoteId")) $("quoteId").textContent = quoteId;
+
+function validarCotizacion(){
+  const largo=parseFloat($("largo").value)||0, ancho=parseFloat($("ancho").value)||0;
+  const pmin=parseFloat($("profMin").value)||0, pmax=parseFloat($("profMax").value)||0;
+  const errores=[];
+  if(largo<=0 || ancho<=0) errores.push("Largo y ancho deben ser mayores que cero.");
+  if(pmin<=0 || pmax<=0) errores.push("Las profundidades deben ser mayores que cero.");
+  if(pmax<pmin) errores.push("La profundidad máxima no puede ser menor que la mínima.");
+  if(adicionalesState.jacuzzi30 && !(parseFloat($("profJacuzzi30")?.value)>0)) errores.push("Ingresa la profundidad del Jacuzzi 3 × 3 para calcular sus muros.");
+  const box=$("validationMsg");
+  if(box){ box.textContent=errores.join(" "); box.classList.toggle("show", errores.length>0); }
+  return errores.length===0;
+}
+let ultimoResultado = null;
+
+function drawPool(largo,ancho,profMin,profMax){
+  const svg=$("poolSvg");
+  const W=220,H=170,pad=26;
+  const maxDim=Math.max(largo,ancho,1);
+  const scale=(W-2*pad)/Math.max(maxDim,6);
+  const w=Math.min(largo*scale,W-2*pad);
+  const topY=40, botY=130;
+  const x0=(W-w)/2;
+  svg.innerHTML=`
+    <defs>
+      <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#0E7C6E" stop-opacity="0.75"/>
+      </linearGradient>
+    </defs>
+    <rect x="${x0-6}" y="${topY-6}" width="${w+12}" height="${botY-topY+16}" rx="6" fill="#0D1526" stroke="#233255"/>
+    <path d="M${x0} ${topY} L${x0+w} ${topY} L${x0+w} ${botY-14} L${x0+w-10} ${botY} L${x0+10} ${botY} L${x0} ${botY-14} Z"
+      fill="url(#waterGrad)" stroke="#2DD4BF" stroke-width="1.2"/>
+    <line x1="${x0}" y1="${topY-14}" x2="${x0+w}" y2="${topY-14}" stroke="#657089" stroke-width="1"/>
+    <text x="${x0+w/2}" y="${topY-18}" fill="#8B96AC" font-size="10" text-anchor="middle" font-family="Calibri,Arial">${largo} m</text>
+    <text x="${x0-14}" y="${(topY+botY)/2}" fill="#8B96AC" font-size="10" text-anchor="middle" font-family="Calibri,Arial" transform="rotate(-90 ${x0-14} ${(topY+botY)/2})">${ancho} m</text>
+    <text x="${x0+w/2}" y="${botY+22}" fill="#5EEAD4" font-size="10" text-anchor="middle" font-family="Calibri,Arial">${profMin}–${profMax} m prof.</text>
+  `;
+}
+
+function render(){
+  const largo=parseFloat($("largo").value)||0;
+  const ancho=parseFloat($("ancho").value)||0;
+  const profMin=parseFloat($("profMin").value)||0;
+  const profMax=parseFloat($("profMax").value)||0;
+  const borde=$("tipoBorde").value;
+  const tipoLosa=$("tipoLosa").value;
+  const espesorLosa=parseFloat($("espesorLosa").value)||0;
+  const margen=parseFloat($("margen").value)||0;
+  const ciudadInfo=CIUDADES.find(c=>c.ciudad===$("ciudad").value);
+  const incGastos=$("incGastos").checked;
+  const numFocos=Math.max(0, parseInt($("numFocos").value)||0);
+  const plazo=$("plazo").value.trim() || "Por definir";
+  const profJacuzzi30=parseFloat($("profJacuzzi30")?.value)||0;
+  validarCotizacion();
+
+  $("cityTag").textContent=`${ciudadInfo.ciudad} · Hub ${ciudadInfo.hub}`;
+
+  const r=calcular({largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa});
+  ultimoResultado = {r,largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,numFocos,plazo,profJacuzzi30,quoteId};
+
+  drawPool(largo,ancho,profMin,profMax);
+  $("stSup").textContent=r.sup.toFixed(1);
+  $("stVol").textContent=r.vol.toFixed(1);
+  $("stPer").textContent=r.per.toFixed(1);
+  $("stDes").textContent=r.areaDes.toFixed(1);
+
+  // adicionales panel
+  const addWrap=$("adicionales");
+  addWrap.innerHTML="";
+  addWrap.className="add-groups";
+  const adds=adicionalesList(r.areaDes,ciudadInfo,tipoLosa,profJacuzzi30);
+  const grupos=[...new Set(adds.map(a=>a.grupo))];
+  grupos.forEach(grupo=>{
+    const box=document.createElement("div");
+    box.className="add-group";
+    box.innerHTML=`<div class="add-group-title">${grupo}</div>`;
+    adds.filter(a=>a.grupo===grupo).forEach(a=>{
+      if(!(a.id in adicionalesState)) adicionalesState[a.id]=false;
+      if(a.id==="jacuzzi30"){
+        const jf=$("jacuzziProfField");
+        if(jf) jf.style.display=adicionalesState.jacuzzi30?"block":"none";
+      }
+      const row=document.createElement("div"); row.className="toggle-row";
+      row.innerHTML=`<span class="add-label">${a.label}</span>
+        <div class="add-control">
+          <span class="price">${a.id==="jacuzzi30" && profJacuzzi30>0 ? clp(a.precio)+" · "+calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).volumenHormigon.toFixed(2)+" m³ hormigón" : clp(a.precio)}</span>
+          <label class="switch"><input type="checkbox" data-id="${a.id}" ${adicionalesState[a.id]?"checked":""}><span class="slider"></span></label>
+        </div>`;
+      box.appendChild(row);
+    });
+    addWrap.appendChild(box);
+  });
+  addWrap.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+    cb.addEventListener("change",e=>{
+      adicionalesState[e.target.dataset.id]=e.target.checked;
+      const jf=$("jacuzziProfField");
+      if(jf) jf.style.display=adicionalesState.jacuzzi30?"block":"none";
+      render();
+    });
+  });
+  const selectedAdds = adds.filter(a=>adicionalesState[a.id]);
+  const addTotal = selectedAdds.reduce((s,a)=>s+a.precio,0);
+  const mk=margen/100;
+
+  // Los adicionales forman parte del costo neto de la propuesta y reciben el mismo margen.
+  const nivel1SubtotalConAdds = r.nivel1Subtotal + addTotal;
+  const nivel2SubtotalConAdds = r.nivel2Subtotal + addTotal;
+  const nivel1TotalConAdds = nivel1SubtotalConAdds * (1+mk);
+  const nivel2TotalConAdds = nivel2SubtotalConAdds * (1+mk);
+  const addItems = selectedAdds.map(a=>[a.label, a.precio]);
+
+  // tiers
+  const tiersEl=$("tiers");
+  const data=[
+    {name:"Nivel 1 — Piscina Base", total:nivel1TotalConAdds, sub:nivel1SubtotalConAdds, items:[
+      ["Costo piscina (obra civil + terminaciones)", r.totalNeto],
+      ...addItems,
+    ]},
+    {name:"Nivel 2 — + Bomba de Calor", total:nivel2TotalConAdds, sub:nivel2SubtotalConAdds, reco:true, items:[
+      ["Costo piscina (obra civil + terminaciones)", r.totalNeto],
+      [`Bomba de calor (hasta ${r.bcTier.hasta} m³)`, r.bcEquipo+r.bcFlete],
+      ["Instalación bomba de calor", r.bcInstalacion],
+      ...addItems,
+    ]},
+  ];
+  tiersEl.innerHTML="";
+  data.forEach(d=>{
+    const el=document.createElement("div");
+    el.className="tier"+(d.reco?" reco":"");
+    el.innerHTML=`${d.reco?'<div class="reco-badge">Recomendado</div>':""}
+      <div class="name">${d.name}</div>
+      <div class="total">${clp(d.total)}</div>
+      <div class="sub">Neto ${clp(d.sub)} + ${margen}% margen</div>
+      <ul>${d.items.map(it=>`<li><span>${it[0]}</span><b>${clp(it[1])}</b></li>`).join("")}</ul>`;
+    tiersEl.appendChild(el);
+  });
+
+  if(addTotal>0){
+    const note=document.createElement("div");
+    note.style.cssText="grid-column:1/-1;font-size:12px;color:var(--teal-300);text-align:center;padding-top:4px;";
+    note.textContent=`Adicionales incorporados al total: ${clp(addTotal)} neto · ${clp(addTotal*(1+mk))} con margen ${margen}%`;
+    tiersEl.appendChild(note);
+  }
+
+  // breakdown
+  const bd=$("breakdown");
+  let rows="";
+  let lastSection="";
+  r.materiales.forEach(m=>{
+    if(m[5]!==lastSection){ rows+=`<tr class="section"><td colspan="4">${m[5]}</td></tr>`; lastSection=m[5]; }
+    rows+=`<tr><td>${m[0]}</td><td class="num">${m[1]} ${m[2]}</td><td class="num">${clp(m[3])}</td><td class="num">${clp(m[4])}</td></tr>`;
+  });
+  bd.innerHTML=`<table>
+    <tr><th>Ítem</th><th>Cant.</th><th>Valor unit.</th><th>Total</th></tr>
+    ${rows}
+    <tr class="total"><td colspan="3">TOTAL MATERIALES</td><td class="num">${clp(r.totalMateriales)}</td></tr>
+    <tr class="section"><td colspan="4">MANO DE OBRA</td></tr>
+    <tr><td>Mano de obra construcción (tramo ${r.tierMO.tam})</td><td class="num">1</td><td class="num">${clp(r.tierMO.valor)}</td><td class="num">${clp(r.tierMO.valor)}</td></tr>
+    ${incGastos?`<tr><td>Gastos generales / viáticos (opcional, activado)</td><td class="num">1</td><td class="num">${clp(750000)}</td><td class="num">${clp(750000)}</td></tr>`:`<tr><td style="color:var(--slate-500)">Gastos generales / viáticos (desactivado)</td><td class="num">—</td><td class="num">—</td><td class="num">$0</td></tr>`}
+    <tr class="total"><td colspan="3">TOTAL NETO PISCINA BASE</td><td class="num">${clp(r.totalNeto)}</td></tr>
+  </table>`;
+}
+
+
+function generarPdfCliente(returnHtml=false){
+  if(!validarCotizacion()) return;
+  if(!ultimoResultado) render();
+  const u=ultimoResultado;
+  const r=u.r;
+  const cliente=$('cliente').value.trim() || 'Cliente';
+  const proyecto=$('tipoProyecto').value;
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
+  const addTotal=adds.reduce((s,a)=>s+a.precio,0);
+  const totalBase=(r.nivel1Subtotal+addTotal)*(1+u.margen/100);
+  const totalCalor=(r.nivel2Subtotal+addTotal)*(1+u.margen/100);
+  registrarCotizacionEnHistorial(totalBase, totalCalor);
+  const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
+  const tipoFiltro=filtroGrande?'BC100':'BC50';
+  const tipoBomba=filtroGrande?'1.5 HP':'1 HP';
+  const terminacion=adicionalesState.diamond ? 'Revestimiento Diamond Brite' : 'Piscina pintada';
+  const fecha=new Date().toLocaleDateString('es-CL');
+  const fmt=n=>Number(n||0).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const adicionalesHtml=adds.length
+    ? adds.map(a=>`<div class="row"><span>${a.label}</span><b>${clp(a.precio*(1+u.margen/100))}</b></div>`).join('')
+    : '<div class="row"><span>Sin adicionales seleccionados</span><span>-</span></div>';
+
+  const pdfHtml=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a3568">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PS piscina">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg"><title>Presupuesto PiscinaSur - ${cliente}</title>
+  <style>
+    :root{--navy:#0a3568;--navy2:#062b57;--cyan:#17b8df;--text:#24364a;--muted:#5c7087;--line:#cfd9e5;--soft:#f2f7fb}
+    *{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;font-family:Arial,Helvetica,sans-serif;color:var(--text);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sheet{width:196mm;min-height:283mm;margin:0 auto;background:#fff;padding:6mm 9mm 1.5mm;display:flex;flex-direction:column;overflow:hidden}
+    .header{display:table;width:100%;table-layout:fixed;padding-bottom:2.5mm;border-bottom:1px solid #aac0d7}.header>div{display:table-cell;vertical-align:top;padding:0 3.5mm}.header>div:first-child{padding-left:0;width:20%}.header>div:last-child{padding-right:0;width:26%}
+    .brand .wave{width:45px;height:14px;border-radius:50%;border-top:7px solid var(--cyan);transform:skewX(-18deg);margin:0 auto 2px}
+    .brand .name{font-size:24px;font-weight:800;color:var(--navy);line-height:.9;text-align:center}.brand .chile{font-size:10px;letter-spacing:5px;text-align:center;color:var(--navy);margin-top:5px}
+    h1{margin:0 0 4px;font-size:19px;color:var(--navy);letter-spacing:.2px}.subtitle{font-size:12px;line-height:1.4;color:#1f334b}.meta{font-size:10.5px;line-height:1.35}.meta b{color:var(--navy)}
+    .project{padding:2.5mm 0 2mm;border-bottom:1px solid #e3ecf4}.project-info{font-size:10.5px;line-height:1.7}.kv{display:table;width:100%}.kv b{display:table-cell;width:32mm;color:var(--navy);vertical-align:top}.kv span{display:table-cell;vertical-align:top}
+    .section-title{font-size:13.5px;font-weight:800;color:var(--navy);margin:1.5mm 0 1mm;text-transform:uppercase}.label{font-size:10px;color:#55708d;margin:0.5mm 0}
+    .bottom{display:table;width:100%;table-layout:fixed;margin-top:0.5mm;page-break-inside:avoid;break-inside:avoid}.equip-cell{display:table-cell;vertical-align:top;width:54%;padding-right:3mm}.adds-cell{display:table-cell;vertical-align:top;width:46%;padding-left:3mm}.box-title{font-size:10.7px;font-weight:800;color:var(--navy);text-transform:uppercase;margin-bottom:1.8mm}.icon{width:17px;height:17px;border-radius:50%;display:inline-block;text-align:center;line-height:17px;background:#0d71b9;color:white;font-size:10px;margin-right:4px}
+    .items{font-size:8.9px;line-height:1.25}.item{display:table;width:100%;margin:1mm 0}.item .check{display:table-cell;vertical-align:top;padding-right:4px}.item>div:last-child{display:table-cell;vertical-align:top}.check{width:11px;height:11px;border-radius:50%;background:#0d71b9;color:white;font-size:8px;text-align:center;line-height:11px}.items b{color:var(--navy)}
+    .adicional{background:linear-gradient(180deg,#f0f6fb,#e8f1f8);border-radius:9px;padding:3.2mm;font-size:8.5px}.adicional .head{display:table;width:100%;font-weight:800;color:var(--navy);margin-bottom:2mm}.adicional .head span{display:table-cell}.adicional .head span:last-child{text-align:right}.adicional .row{display:table;width:100%;padding:1mm 0;border-top:1px solid rgba(10,53,104,.08)}.adicional .row span,.adicional .row b{display:table-cell}.adicional .row b{text-align:right}.adicional .row:first-of-type{border-top:0}
+    .construct{margin:2.2mm 0 2.4mm;padding:3mm 3.4mm;border:1px solid #bfd5e7;border-left:3px solid #0d71b9;border-radius:8px;background:#f6fafd;page-break-inside:avoid;break-inside:avoid}.construct .ct{font-size:10.3px;font-weight:900;color:var(--navy);text-transform:uppercase;margin-bottom:1.2mm}.construct .cb{font-size:8.8px;line-height:1.36;color:#334b63}.construct b{color:var(--navy)}
+    .price{margin-top:2mm;background:linear-gradient(90deg,#083a73,#052a56);color:white;border-radius:10px;padding:4.5mm;text-align:center;box-shadow:0 3px 10px rgba(6,47,94,.22);page-break-inside:avoid;break-inside:avoid}.price .t{font-size:11px;font-weight:900;letter-spacing:.3px}.price .v{font-size:34px;font-weight:900;margin-top:1.6mm;line-height:1;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.15)}
+    .alt{margin-top:2mm;border:2px solid #0d71b9;border-radius:10px;text-align:center;padding:3.6mm;color:var(--navy);font-weight:900;font-size:11px;background:#f4f9fd;page-break-inside:avoid;break-inside:avoid}.alt .v{font-size:25px;font-weight:900;margin-top:1.2mm;color:#083a73;line-height:1.05}
+    .legal{font-size:8px;line-height:1.25;margin:2mm 6mm 1.5mm;color:#263b52}.footer{margin-top:auto;margin-left:-9mm;margin-right:-9mm;background:linear-gradient(90deg,#062f5e,#003c76);color:white;display:table;width:calc(100% + 18mm);table-layout:fixed;padding:2.5mm 9mm;font-size:8.5px}.footer>div{display:table-cell;vertical-align:middle}.foot{text-align:center;white-space:nowrap}
+    @media print{@page{size:A4;margin:7mm}html,body{background:#fff}.sheet{width:196mm;min-height:283mm;margin:0;padding:6mm 9mm 1.5mm}}
+  </style></head><body><main class="sheet">
+    <section class="header">
+      <div class="brand"><div class="wave"></div><div class="name">PiscinaSur</div><div class="chile">CHILE</div></div>
+      <div><h1>PRESUPUESTO PARA CLIENTE</h1><div class="subtitle">Piscinas y lagunas naturales · @piscinaSur.chile<br>WhatsApp +56 9 9693 1320</div></div>
+      <div class="meta">📅 &nbsp;${fecha}<br><br>📄 &nbsp;<b>Presupuesto:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;${u.quoteId}</div>
+    </section>
+
+    <section class="project">
+      <div class="project-info">
+        <div class="kv"><b>Cliente:</b><span>${cliente}</span></div><div class="kv"><b>Ciudad:</b><span>${u.ciudadInfo.ciudad}</span></div><div class="kv"><b>Proyecto:</b><span>${proyecto}</span></div>
+        <div class="kv"><b>Medidas:</b><span>${fmt(u.largo)} × ${fmt(u.ancho)} m</span></div><div class="kv"><b>Profundidad:</b><span>${u.profMin} – ${u.profMax} m</span></div><div class="kv"><b>Volumen aprox.:</b><span>${r.vol.toFixed(1)} m³</span></div><div class="kv"><b>Plazo estimado:</b><span>${u.plazo}</span></div>
+      </div>
+    </section>
+
+    <div class="construct">
+      <div class="ct">Sistema constructivo</div>
+      <div class="cb">Piscina ejecutada con <b>losa armada para mejorar la estabilidad</b>, incorporando malla ACMA y fierro de 8 mm en su estructura. Los muros se consideran de aproximadamente <b>20 cm</b> y se ejecutan mediante sistema proyectado tipo <b>shotcrete (chocleteado)</b>. La losa puede ejecutarse con hormigón de camión premezclado o preparada en terreno, según la alternativa definida para la obra.</div>
+    </div>
+
+    <section class="bottom">
+      <div class="equip-cell"><div class="box-title"><span class="icon">⚙</span>Equipamiento y terminaciones incluidas</div><div class="items">
+        <div class="item"><span class="check">✓</span><div><b>Bomba de piscina</b> &nbsp; Marca: Vulcano<br>Tipo: ${tipoBomba} &nbsp; | &nbsp; Seleccionada según ${r.vol.toFixed(1)} m³</div></div>
+        <div class="item"><span class="check">✓</span><div><b>Filtro de arena</b> &nbsp; Marca: Vulcano<br>Tipo: ${tipoFiltro} &nbsp; | &nbsp; Seleccionado según ${r.vol.toFixed(1)} m³</div></div>
+        <div class="item"><span class="check">✓</span><div><b>Iluminación</b> &nbsp; ${u.numFocos} focos LED</div></div>
+        <div class="item"><span class="check">✓</span><div><b>Terminación interior</b> &nbsp; ${terminacion}</div></div>
+        <div class="item"><span class="check">✓</span><div><b>Tipo de borde</b> &nbsp; ${u.borde}</div></div>
+        <div class="item"><span class="check">✓</span><div><b>Sistema incluido</b> &nbsp; Filtración, fitting hidráulico y tablero eléctrico</div></div>
+      </div></div>
+      <div class="adds-cell"><div class="box-title"><span class="icon">＋</span>Adicionales seleccionados</div>
+        <div class="adicional"><div class="head"><span>ADICIONAL</span><span>VALOR INCORPORADO</span></div>${adicionalesHtml}</div>
+        <div class="price"><div class="t">VALOR PROPUESTA PISCINA BASE</div><div class="v">${clp(totalBase)}</div></div>
+        <div class="alt">ALTERNATIVA CON BOMBA DE CALOR:<div class="v">${clp(totalCalor)}</div></div>
+      </div>
+    </section>
+
+    <div class="legal">Los valores corresponden a las medidas y características indicadas en esta propuesta. Cualquier modificación del proyecto puede afectar el valor final.</div>
+    <footer class="footer"><div class="foot">◉ &nbsp;+56 9 9693 1320</div><div class="foot">✉ &nbsp;piscinasur.chile@gmail.com</div><div class="foot">◎ &nbsp;@piscinaSur.chile</div></footer>
+  </main></body></html>`;
+  if(returnHtml) return pdfHtml;
+  const w=window.open('','_blank');
+  if(!w){ alert('El navegador bloqueó la ventana del PDF. Habilita ventanas emergentes para generar el presupuesto.'); return; }
+  w.document.write(pdfHtml);w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);
+}
+
+
+function mensajeComercialWhatsApp(){
+  if(!ultimoResultado) render();
+  const u=ultimoResultado;
+  const cliente=$("cliente").value.trim() || "Cliente";
+  return `Hola ${cliente}, le envío la propuesta para su proyecto de piscina en ${u.ciudadInfo.ciudad}.
+
+Preparé la alternativa de acuerdo con las medidas que conversamos y dejé en el PDF el equipamiento, terminaciones y valor del proyecto.
+
+Revíselo con tranquilidad y cualquier cambio que quiera hacer en medida o terminaciones lo podemos ajustar.
+
+Saludos,
+PiscinaSur Chile`;
+}
+
+async function crearArchivoPdfCliente(){
+  if(!validarCotizacion()) return null;
+  if(!ultimoResultado) render();
+  if(!window.jspdf || !window.jspdf.jsPDF){
+    throw new Error("No se pudo cargar el generador de PDF. Revisa la conexión a internet.");
+  }
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"a4",orientation:"portrait",compress:true});
+  const u=ultimoResultado, r=u.r;
+  const cliente=($('cliente').value.trim() || "Cliente");
+  const proyecto=$('tipoProyecto').value;
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
+  const addTotal=adds.reduce((sum,a)=>sum+a.precio,0);
+  const factor=1+u.margen/100;
+  const totalBase=(r.nivel1Subtotal+addTotal)*factor;
+  const totalCalor=(r.nivel2Subtotal+addTotal)*factor;
+  const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
+  const tipoFiltro=filtroGrande?'BC100':'BC50';
+  const tipoBomba=filtroGrande?'1.5 HP':'1 HP';
+  const terminacion=adicionalesState.diamond ? 'Revestimiento Diamond Brite' : 'Piscina pintada';
+  const fecha=new Date().toLocaleDateString('es-CL');
+  registrarCotizacionEnHistorial(totalBase,totalCalor);
+
+  const navy=[10,53,104], blue=[13,113,185], cyan=[23,184,223], ink=[36,54,74], muted=[92,112,135], light=[242,247,251];
+  const pageW=210, left=14, right=196;
+  const safe=(v)=>String(v ?? "");
+  const money=(n)=>clp(n);
+  const line=(x1,y1,x2,y2,color=[207,217,229])=>{doc.setDrawColor(...color);doc.line(x1,y1,x2,y2)};
+  const txt=(t,x,y,size=9,color=ink,style='normal',opts={})=>{doc.setFont('helvetica',style);doc.setFontSize(size);doc.setTextColor(...color);doc.text(safe(t),x,y,opts)};
+  const wrap=(t,width,size=8.5)=>{doc.setFontSize(size);return doc.splitTextToSize(safe(t),width)};
+
+  // Header
+  doc.setFillColor(...navy);doc.roundedRect(left,10,44,24,3,3,'F');
+  doc.setDrawColor(...cyan);doc.setLineWidth(1.8);doc.lines([[7,-2],[7,2],[7,-2]],20,24,[1,1],'S');
+  txt('PiscinaSur',36,23,14,[255,255,255],'bold',{align:'center'});
+  txt('CHILE',36,29,6,[220,240,248],'bold',{align:'center'});
+  txt('PRESUPUESTO PARA CLIENTE',64,18,16,navy,'bold');
+  txt('Piscinas y proyectos personalizados',64,24,9,muted,'normal');
+  txt('@piscinaSur.chile · WhatsApp +56 9 9693 1320',64,29,8,muted,'normal');
+  txt(fecha,right,17,8,muted,'normal',{align:'right'});
+  txt(u.quoteId,right,23,8,navy,'bold',{align:'right'});
+  line(left,38,right,38,[170,192,215]);
+
+  // Project data
+  let y=45;
+  const kv=(label,value)=>{txt(label,left,y,8.5,navy,'bold');txt(value,48,y,8.5,ink,'normal');y+=5.4};
+  kv('Cliente:',cliente); kv('Ciudad:',u.ciudadInfo.ciudad); kv('Proyecto:',proyecto);
+  kv('Medidas:',`${Number(u.largo).toLocaleString('es-CL')} × ${Number(u.ancho).toLocaleString('es-CL')} m`);
+  kv('Profundidad:',`${u.profMin} – ${u.profMax} m`); kv('Volumen aprox.:',`${r.vol.toFixed(1)} m³`); kv('Plazo estimado:',u.plazo);
+
+  // Constructive system
+  y+=1; doc.setFillColor(246,250,253);doc.setDrawColor(191,213,231);doc.roundedRect(left,y,right-left,24,2,2,'FD');
+  doc.setFillColor(...blue);doc.rect(left,y,2.2,24,'F');
+  txt('SISTEMA CONSTRUCTIVO',left+5,y+6,9,navy,'bold');
+  const construct='Piscina ejecutada con losa armada para mejorar la estabilidad, incorporando malla ACMA y fierro de 8 mm. Muros de aproximadamente 20 cm ejecutados mediante sistema proyectado tipo shotcrete (chocleteado). La losa puede ejecutarse con hormigón premezclado o preparado en terreno, según la alternativa cotizada.';
+  txt(wrap(construct,168,8),left+5,y+11,8,ink,'normal',{lineHeightFactor:1.25});
+  y+=30;
+
+  // Two columns
+  const colGap=6, colW=(right-left-colGap)/2, x1=left, x2=left+colW+colGap;
+  txt('EQUIPAMIENTO Y TERMINACIONES',x1,y,9.5,navy,'bold');
+  txt('ADICIONALES SELECCIONADOS',x2,y,9.5,navy,'bold'); y+=5;
+  doc.setFillColor(...light);doc.roundedRect(x1,y,colW,52,2,2,'F');
+  doc.setFillColor(...light);doc.roundedRect(x2,y,colW,52,2,2,'F');
+  let ey=y+6;
+  const equip=[
+    `Bomba Vulcano ${tipoBomba}`,
+    `Filtro de arena Vulcano ${tipoFiltro}`,
+    `${u.numFocos} foco(s) LED`,
+    terminacion,
+    `Borde: ${u.borde}`,
+    'Filtración, fitting hidráulico y tablero eléctrico'
+  ];
+  equip.forEach(t=>{txt('✓',x1+4,ey,8,blue,'bold');const ls=wrap(t,colW-12,8);txt(ls,x1+9,ey,8,ink,'normal',{lineHeightFactor:1.15});ey+=Math.max(5,ls.length*3.7+1)});
+  let ay=y+6;
+  if(adds.length===0){txt('Sin adicionales seleccionados',x2+4,ay,8,muted,'normal');}
+  else adds.forEach(a=>{
+    const label=wrap(a.label,colW-33,7.8);txt(label,x2+4,ay,7.8,ink,'normal',{lineHeightFactor:1.1});
+    txt(money(a.precio*factor),x2+colW-4,ay,7.8,navy,'bold',{align:'right'});
+    ay+=Math.max(5,label.length*3.5+1);
+  });
+  y+=59;
+
+  // Main price
+  doc.setFillColor(...navy);doc.roundedRect(left,y,right-left,25,3,3,'F');
+  txt('VALOR PROPUESTA PISCINA BASE',pageW/2,y+8,9,[235,245,255],'bold',{align:'center'});
+  txt(money(totalBase),pageW/2,y+19,23,[255,255,255],'bold',{align:'center'});
+  y+=30;
+  doc.setDrawColor(...blue);doc.setLineWidth(.7);doc.roundedRect(left,y,right-left,18,3,3,'S');
+  txt('ALTERNATIVA CON BOMBA DE CALOR',pageW/2,y+6,8.5,navy,'bold',{align:'center'});
+  txt(money(totalCalor),pageW/2,y+14,16,navy,'bold',{align:'center'});
+
+  // Footer/legal
+  y=264; txt(wrap('Los valores corresponden a las medidas y características indicadas en esta propuesta. Cualquier modificación del proyecto puede afectar el valor final.',170,7.5),pageW/2,y,7.5,muted,'normal',{align:'center',lineHeightFactor:1.2});
+  doc.setFillColor(6,47,94);doc.rect(0,278,210,19,'F');
+  txt('+56 9 9693 1320',38,288,8,[255,255,255],'bold',{align:'center'});
+  txt('piscinasur.chile@gmail.com',105,288,8,[255,255,255],'bold',{align:'center'});
+  txt('@piscinaSur.chile',173,288,8,[255,255,255],'bold',{align:'center'});
+
+  const nombreCliente=cliente.replace(/[^\p{L}\p{N}_-]+/gu,"_");
+  const nombreArchivo=`PS_${nombreCliente}_${u.quoteId}.pdf`;
+  const blob=doc.output('blob');
+  if(!blob || blob.size<5000) throw new Error('El PDF no pudo generarse correctamente.');
+  return new File([blob],nombreArchivo,{type:'application/pdf'});
+}
+
+/* =======================================================================
+   HISTORIAL DE COTIZACIONES + ESTUDIO DE MERCADO
+   Cada PDF generado o compartido queda registrado localmente en este
+   dispositivo (localStorage). El estado se marca a mano cuando el cliente
+   responde. Solo lo "Aceptado" se traspasa al CRM — el resto queda como
+   dato histórico para medir tasa de conversión por temporada.
+   ======================================================================= */
+const HISTORIAL_KEY = "ps_historial_cotizaciones";
+
+function cargarHistorial(){
+  try{
+    return JSON.parse(localStorage.getItem(HISTORIAL_KEY) || "[]");
+  }catch(e){ return []; }
+}
+function guardarHistorialCompleto(lista){
+  try{ localStorage.setItem(HISTORIAL_KEY, JSON.stringify(lista)); }catch(e){}
+}
+
+function registrarCotizacionEnHistorial(totalBase, totalCalor){
+  if(!ultimoResultado) return;
+  const historial = cargarHistorial();
+  if(historial.some(h=>h.quoteId===ultimoResultado.quoteId)) return; // evita duplicados si ya se guardó este mismo presupuesto
+
+  historial.unshift({
+    quoteId: ultimoResultado.quoteId,
+    fecha: new Date().toISOString(),
+    cliente: ($("cliente").value.trim() || "Cliente"),
+    ciudad: ultimoResultado.ciudadInfo.ciudad,
+    hub: ultimoResultado.ciudadInfo.hub,
+    largo: ultimoResultado.largo,
+    ancho: ultimoResultado.ancho,
+    volumen: Number(ultimoResultado.r.vol.toFixed(1)),
+    totalBase: totalBase,
+    totalCalor: totalCalor,
+    estado: "pendiente" // pendiente | aceptado | rechazado
+  });
+  guardarHistorialCompleto(historial);
+  renderHistorial();
+}
+
+function actualizarEstadoHistorial(quoteId, nuevoEstado){
+  const historial = cargarHistorial();
+  const item = historial.find(h=>h.quoteId===quoteId);
+  if(!item) return;
+  item.estado = nuevoEstado;
+  guardarHistorialCompleto(historial);
+  renderHistorial();
+}
+
+function eliminarDeHistorial(quoteId){
+  const historial = cargarHistorial().filter(h=>h.quoteId!==quoteId);
+  guardarHistorialCompleto(historial);
+  renderHistorial();
+}
+
+function exportarAlCRM(quoteId){
+  const item = cargarHistorial().find(h=>h.quoteId===quoteId);
+  if(!item) return;
+  // Formato genérico pensado para importar en PiscinaSur_CRM.html.
+  // Si el CRM espera otros nombres de campo, ajustamos el mapeo cuando conectemos ambos módulos.
+  const registroCRM = {
+    origen: "cotizador",
+    cliente: item.cliente,
+    ciudad: item.ciudad,
+    presupuestoAceptado: {
+      quoteId: item.quoteId,
+      fecha: item.fecha,
+      medidas: `${item.largo} × ${item.ancho} m (${item.volumen} m³)`,
+      montoBase: item.totalBase,
+      montoConBombaCalor: item.totalCalor
+    }
+  };
+  const blob = new Blob([JSON.stringify(registroCRM, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `CRM_${item.cliente.replace(/[^\p{L}\p{N}_-]+/gu,"_")}_${item.quoteId}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+function renderStatsHistorial(historial){
+  const total = historial.length;
+  const aceptadas = historial.filter(h=>h.estado==="aceptado");
+  const rechazadas = historial.filter(h=>h.estado==="rechazado").length;
+  const pctAceptacion = total ? Math.round((aceptadas.length/total)*100) : 0;
+  const ticketProm = aceptadas.length ? aceptadas.reduce((s,h)=>s+h.totalBase,0)/aceptadas.length : 0;
+
+  const conteoCiudades = {};
+  historial.forEach(h=>{ conteoCiudades[h.ciudad] = (conteoCiudades[h.ciudad]||0)+1; });
+  const topCiudad = Object.entries(conteoCiudades).sort((a,b)=>b[1]-a[1])[0];
+
+  $("statsHistorial").innerHTML = `
+    <div class="stat"><div class="v">${total}</div><div class="l">Cotizaciones registradas</div></div>
+    <div class="stat"><div class="v">${pctAceptacion}%</div><div class="l">Tasa de aceptación (${aceptadas.length} aceptadas)</div></div>
+    <div class="stat"><div class="v">${rechazadas}</div><div class="l">Rechazadas</div></div>
+    <div class="stat"><div class="v">${ticketProm?clp(ticketProm):"—"}</div><div class="l">Ticket promedio aceptado</div></div>
+    <div class="stat" style="grid-column:1/-1"><div class="v" style="font-size:14px">${topCiudad?topCiudad[0]+" ("+topCiudad[1]+")":"—"}</div><div class="l">Ciudad más cotizada</div></div>
+  `;
+}
+
+function renderHistorial(){
+  const historial = cargarHistorial();
+  renderStatsHistorial(historial);
+  const cont = $("listaHistorial");
+  if(!historial.length){
+    cont.innerHTML = `<div class="hint">Aún no hay cotizaciones registradas. Se guardan automáticamente cada vez que generas un PDF o compartes por WhatsApp.</div>`;
+    return;
+  }
+  cont.innerHTML = historial.map(h=>{
+    const fecha = new Date(h.fecha).toLocaleDateString("es-CL");
+    return `<div class="tier" style="margin-bottom:10px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;">${h.cliente}</div>
+          <div class="hint">${h.ciudad} · ${h.largo}×${h.ancho} m · ${fecha} · ${h.quoteId}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700;">${clp(h.totalBase)}</div>
+          <div class="hint">+BC: ${clp(h.totalCalor)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;">
+        <select data-quoteid="${h.quoteId}" class="selectEstadoHistorial" style="width:auto;padding:6px 8px;font-size:12.5px;">
+          <option value="pendiente" ${h.estado==="pendiente"?"selected":""}>Pendiente</option>
+          <option value="aceptado" ${h.estado==="aceptado"?"selected":""}>Aceptado</option>
+          <option value="rechazado" ${h.estado==="rechazado"?"selected":""}>Rechazado</option>
+        </select>
+        ${h.estado==="aceptado" ? `<button type="button" class="btnEnviarCRM" data-quoteid="${h.quoteId}" style="border:0;border-radius:7px;padding:7px 10px;background:var(--petrol);color:#fff;font-size:12px;cursor:pointer;">Enviar al CRM</button>` : ""}
+        <button type="button" class="btnBorrarHistorial" data-quoteid="${h.quoteId}" style="border:0;border-radius:7px;padding:7px 10px;background:transparent;color:#b64545;font-size:12px;cursor:pointer;">Eliminar</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  cont.querySelectorAll(".selectEstadoHistorial").forEach(sel=>{
+    sel.addEventListener("change",()=>actualizarEstadoHistorial(sel.dataset.quoteid, sel.value));
+  });
+  cont.querySelectorAll(".btnEnviarCRM").forEach(btn=>{
+    btn.addEventListener("click",()=>exportarAlCRM(btn.dataset.quoteid));
+  });
+  cont.querySelectorAll(".btnBorrarHistorial").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      if(confirm("¿Eliminar esta cotización del historial? Esta acción no se puede deshacer.")) eliminarDeHistorial(btn.dataset.quoteid);
+    });
+  });
+}
+
+
+/* =======================================================================
+   ARCHIVO LOCAL DE PDF POR CLIENTE (IndexedDB)
+   Guarda el PDF en el mismo teléfono/navegador para rescatarlo después.
+   ======================================================================= */
+const PDF_DB_NAME="ps_cotiza_archivo";
+const PDF_DB_VERSION=1;
+const PDF_STORE="pdfs";
+
+function abrirPdfDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(PDF_DB_NAME,PDF_DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(PDF_STORE)){
+        const store=db.createObjectStore(PDF_STORE,{keyPath:"id",autoIncrement:true});
+        store.createIndex("cliente","cliente",{unique:false});
+        store.createIndex("fecha","fecha",{unique:false});
+      }
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+async function guardarPdfLocal(archivo){
+  if(!archivo) return;
+  const db=await abrirPdfDb();
+  const cliente=($("cliente").value.trim() || "Cliente");
+  const registro={
+    cliente,
+    clienteBusca:cliente.toLocaleLowerCase("es"),
+    fecha:new Date().toISOString(),
+    quoteId:ultimoResultado?.quoteId || quoteId,
+    nombre:archivo.name,
+    tipo:archivo.type || "application/pdf",
+    blob:archivo
+  };
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(PDF_STORE,"readwrite");
+    tx.objectStore(PDF_STORE).add(registro);
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+  db.close();
+  await renderPdfGuardados();
+}
+
+async function listarPdfLocales(){
+  const db=await abrirPdfDb();
+  const items=await new Promise((resolve,reject)=>{
+    const req=db.transaction(PDF_STORE,"readonly").objectStore(PDF_STORE).getAll();
+    req.onsuccess=()=>resolve(req.result || []);
+    req.onerror=()=>reject(req.error);
+  });
+  db.close();
+  return items.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+}
+
+async function obtenerPdfLocal(id){
+  const db=await abrirPdfDb();
+  const item=await new Promise((resolve,reject)=>{
+    const req=db.transaction(PDF_STORE,"readonly").objectStore(PDF_STORE).get(Number(id));
+    req.onsuccess=()=>resolve(req.result || null);
+    req.onerror=()=>reject(req.error);
+  });
+  db.close();
+  return item;
+}
+
+async function eliminarPdfLocal(id){
+  const db=await abrirPdfDb();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(PDF_STORE,"readwrite");
+    tx.objectStore(PDF_STORE).delete(Number(id));
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error);
+  });
+  db.close();
+  await renderPdfGuardados();
+}
+
+function descargarBlob(blob,nombre){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=nombre || "presupuesto.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+async function compartirPdfGuardado(id){
+  const item=await obtenerPdfLocal(id);
+  if(!item) return alert("No se encontró el PDF guardado.");
+  const file=new File([item.blob],item.nombre,{type:item.tipo || "application/pdf"});
+  if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+    try{
+      await navigator.share({title:"Presupuesto PiscinaSur",text:`Presupuesto de ${item.cliente}`,files:[file]});
+      return;
+    }catch(err){
+      if(err && err.name==="AbortError") return;
+    }
+  }
+  descargarBlob(item.blob,item.nombre);
+  alert("El PDF se descargó. Desde Descargas puedes adjuntarlo en WhatsApp.");
+}
+
+async function renderPdfGuardados(){
+  const cont=$("listaPdfGuardados");
+  if(!cont || !("indexedDB" in window)) return;
+  const q=($("buscarPdfCliente")?.value || "").trim().toLocaleLowerCase("es");
+  const items=(await listarPdfLocales()).filter(x=>!q || String(x.clienteBusca || x.cliente || "").includes(q));
+  if(!items.length){
+    cont.innerHTML='<div class="saved-empty">No hay PDF guardados para esta búsqueda.</div>';
+    return;
+  }
+  cont.innerHTML=items.map(x=>{
+    const fecha=new Date(x.fecha).toLocaleString("es-CL");
+    return `<div class="saved-card">
+      <div class="saved-head">
+        <div><div class="saved-name">${escapeHtml(x.cliente)}</div><div class="saved-meta">${fecha} · ${escapeHtml(x.quoteId || "")}</div></div>
+      </div>
+      <div class="saved-meta">${escapeHtml(x.nombre)}</div>
+      <div class="saved-actions">
+        <button type="button" class="btnSavedDownload" data-id="${x.id}">Descargar</button>
+        <button type="button" class="btnSavedShare" data-id="${x.id}">Compartir</button>
+        <button type="button" class="btnSavedDelete" data-id="${x.id}">Eliminar</button>
+      </div>
+    </div>`;
+  }).join("");
+  cont.querySelectorAll(".btnSavedDownload").forEach(btn=>btn.addEventListener("click",async()=>{
+    const item=await obtenerPdfLocal(btn.dataset.id);
+    if(item) descargarBlob(item.blob,item.nombre);
+  }));
+  cont.querySelectorAll(".btnSavedShare").forEach(btn=>btn.addEventListener("click",()=>compartirPdfGuardado(btn.dataset.id)));
+  cont.querySelectorAll(".btnSavedDelete").forEach(btn=>btn.addEventListener("click",async()=>{
+    if(confirm("¿Eliminar este PDF guardado?")) await eliminarPdfLocal(btn.dataset.id);
+  }));
+}
+
+async function enviarWhatsApp(){
+  if(!validarCotizacion()) return;
+
+  const btn=$("btnWhatsApp");
+  const original=btn.textContent;
+  btn.disabled=true;
+  btn.textContent="Preparando PDF…";
+
+  try{
+    const archivo=await crearArchivoPdfCliente();
+    if(!archivo) return;
+    await guardarPdfLocal(archivo);
+
+    const mensaje=mensajeComercialWhatsApp();
+
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[archivo]}))){
+      btn.textContent="Abriendo compartir…";
+      await navigator.share({
+        title:"Propuesta PiscinaSur",
+        text:mensaje,
+        files:[archivo]
+      });
+      return;
+    }
+
+    // Respaldo: descarga el PDF y abre WhatsApp con el texto preparado.
+    const urlArchivo=URL.createObjectURL(archivo);
+    const a=document.createElement("a");
+    a.href=urlArchivo;
+    a.download=archivo.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(urlArchivo),4000);
+
+    const urlWa=`https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWa,"_blank");
+    alert("Tu navegador no permite compartir archivos directamente. El PDF se descargó y WhatsApp se abrió con el mensaje; adjunta el PDF descargado.");
+  }catch(err){
+    if(err && err.name==="AbortError") return;
+    alert(err?.message || "No se pudo preparar el PDF para compartir.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=original;
+  }
+}
+
+$("btnPdfCliente").addEventListener("click",async()=>{
+  if(!validarCotizacion()) return;
+  const btn=$("btnPdfCliente");
+  const original=btn.textContent;
+  btn.disabled=true;
+  btn.textContent="Generando PDF…";
+  try{
+    const archivo=await crearArchivoPdfCliente();
+    if(!archivo) return;
+    await guardarPdfLocal(archivo);
+    descargarBlob(archivo,archivo.name);
+  }catch(err){
+    alert(err?.message || "No se pudo generar el PDF.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=original;
+  }
+});
+$("btnWhatsApp").addEventListener("click",()=>{
+  if(!validarCotizacion()) return;
+  enviarWhatsApp();
+});
+
+// Medidas rápidas: rellenan largo/ancho, pero los campos siguen siendo editables.
+document.querySelectorAll(".measure-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    $("largo").value=btn.dataset.largo;
+    $("ancho").value=btn.dataset.ancho;
+    document.querySelectorAll(".measure-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    render();
+  });
+});
+function syncQuickMeasure(){
+  const l=parseFloat($("largo").value), a=parseFloat($("ancho").value);
+  document.querySelectorAll(".measure-btn").forEach(btn=>{
+    const match=parseFloat(btn.dataset.largo)===l && parseFloat(btn.dataset.ancho)===a;
+    btn.classList.toggle("active",match);
+  });
+}
+$("largo").addEventListener("input",syncQuickMeasure);
+$("ancho").addEventListener("input",syncQuickMeasure);
+syncQuickMeasure();
+
+["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
+  $(id).addEventListener("input",()=>{
+    render();
+  });
+  $(id).addEventListener("change",render);
+});
+
+if($("buscarPdfCliente")){
+  $("buscarPdfCliente").addEventListener("input",renderPdfGuardados);
+}
+if($("btnVerTodosPdf")){
+  $("btnVerTodosPdf").addEventListener("click",()=>{
+    $("buscarPdfCliente").value="";
+    renderPdfGuardados();
+  });
+}
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+
+render();
+pintarUfTag();
+obtenerValorUF();
+renderHistorial();
+renderPdfGuardados();
+</script>
+</body>
+</html>
