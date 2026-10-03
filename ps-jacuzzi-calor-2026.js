@@ -1,2 +1,0 @@
-/* Bomba de calor jacuzzi: categoría reforzada >50 m3, editable por cotización. */
-window.PSJacuzziCalor2026={objetivoC:40,categoria:'Piscinas sobre 50 m³',crear(modelo='',capacidad='',precio=0,flete=0,instalacion=0){return {modelo,capacidad,objetivoC:40,categoria:this.categoria,precio:Number(precio)||0,flete:Number(flete)||0,instalacion:Number(instalacion)||0,get total(){return this.precio+this.flete+this.instalacion}}}};
