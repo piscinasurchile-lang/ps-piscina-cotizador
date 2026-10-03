@@ -1,0 +1,1 @@
+PDF cliente: desglose de alcance SIN valores por item. Mostrar solo Valor neto Jacuzzi y Valor Jacuzzi + bomba de calor.
