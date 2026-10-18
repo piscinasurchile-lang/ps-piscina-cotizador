@@ -284,6 +284,22 @@
             <label class="switch"><input type="checkbox" id="incGastos"><span class="slider"></span></label>
           </div>
         </div>
+        <div class="toggle-row">
+          <span>Excavación a mano (sin retroexcavadora)</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="price">Quita la retroexcavadora</span>
+            <label class="switch"><input type="checkbox" id="excavMano"><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="row2" style="margin-top:10px;">
+          <div class="field"><label>Valor por viaje de camión ($)</label><input type="number" id="precioViaje" value="100000" step="5000"></div>
+          <div class="field"><label>Obra a medida: costo neto ($)</label><input type="number" id="obraMedidaMonto" value="1200000" step="50000"></div>
+        </div>
+        <div class="field">
+          <label>Obra a medida: detalle para el cliente</label>
+          <input type="text" id="obraMedidaTxt" value="excavación y retiro de tierra a mano hasta un punto de carga para camión, traslado de la mezcla en carretilla (unos 20 m) e ingreso de materiales por 8 peldaños, en dos tramos de 4">
+          <div class="hint">Se activan en Adicionales → Condiciones de obra.</div>
+        </div>
       </div>
 
       <div class="panel">
@@ -462,7 +478,7 @@ async function obtenerValorUF(){
    MOTOR DE CÁLCULO
    ======================================================================= */
 function calcular(input){
-  const {largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa} = input;
+  const {largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,excavMano} = input;
   const sup = largo*ancho;
   const per = 2*(largo+ancho);
   const profProm = (profMin+profMax)/2;
@@ -502,7 +518,7 @@ function calcular(input){
     ["Pintura borde piscina", 1, "gl", per*RATIOS.pinturaBordePrecioMl, per*RATIOS.pinturaBordePrecioMl, "HORMIGONES PISCINA"],
     ["Sobrecosto borde infinito", 1, "gl", bordeInfinitoSobrecosto, bordeInfinitoSobrecosto, "HORMIGONES PISCINA"],
     ["Estanque compensador (borde infinito)", 1, "gl", bordeInfinitoEstanque, bordeInfinitoEstanque, "HORMIGONES PISCINA"],
-    ["Retroexcavadora (8 hrs)", 8, "hr", 38000, 8*38000, "HORMIGONES PISCINA"],
+    ...(excavMano ? [] : [["Retroexcavadora (8 hrs)", 8, "hr", 38000, 8*38000, "HORMIGONES PISCINA"]]),
   ];
 
   const filtroGrande = vol>=RATIOS.umbralFiltroBombaM3;
@@ -591,7 +607,11 @@ function calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi){
   };
 }
 
-function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi30=0){
+function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi30=0, vol=0){
+  // Retiro de tierra: volumen excavado + 20% de esponjamiento, camiones de 12 m³
+  const precioViaje=parseFloat(document.getElementById("precioViaje")?.value)||0;
+  const viajesTierra=Math.ceil((vol*1.20)/12);
+  const obraMedidaMonto=parseFloat(document.getElementById("obraMedidaMonto")?.value)||0;
   return [
     {id:"diamond", grupo:"Terminación y aislación", label:"Revestimiento Diamond Brite", precio: 65000*areaDes},
     {id:"poliuretano", grupo:"Terminación y aislación", label:"Aislación de muros en poliuretano 2,5 cm", precio: 14000*areaDes},
@@ -602,6 +622,8 @@ function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi3
     {id:"manta", grupo:"Confort", label:"Manta térmica", precio: 250000},
     {id:"jacuzzi25", grupo:"Jacuzzi", label:"Jacuzzi 2,5 × 2,5 m", precio: 2000000},
     {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m · MO $2.700.000 + materiales calculados", precio: calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).total},
+    {id:"retiroTierra", grupo:"Condiciones de obra", label:`Retiro de tierra en camión (${viajesTierra} viaje${viajesTierra===1?"":"s"} de 12 m³)`, precio: viajesTierra*precioViaje},
+    {id:"obraMedida", grupo:"Condiciones de obra", label:"Adicional por obra a medida", precio: obraMedidaMonto},
   ];
 }
 
@@ -670,6 +692,7 @@ function render(){
   const margen=parseFloat($("margen").value)||0;
   const ciudadInfo=CIUDADES.find(c=>c.ciudad===$("ciudad").value);
   const incGastos=$("incGastos").checked;
+  const excavMano=$("excavMano").checked;
   const numFocos=Math.max(0, parseInt($("numFocos").value)||0);
   const plazo=$("plazo").value.trim() || "Por definir";
   const profJacuzzi30=parseFloat($("profJacuzzi30")?.value)||0;
@@ -677,7 +700,7 @@ function render(){
 
   $("cityTag").textContent=`${ciudadInfo.ciudad} · Hub ${ciudadInfo.hub}`;
 
-  const r=calcular({largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa});
+  const r=calcular({largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,excavMano});
   ultimoResultado = {r,largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,numFocos,plazo,profJacuzzi30,quoteId};
 
   drawPool(largo,ancho,profMin,profMax);
@@ -690,7 +713,7 @@ function render(){
   const addWrap=$("adicionales");
   addWrap.innerHTML="";
   addWrap.className="add-groups";
-  const adds=adicionalesList(r.areaDes,ciudadInfo,tipoLosa,profJacuzzi30);
+  const adds=adicionalesList(r.areaDes,ciudadInfo,tipoLosa,profJacuzzi30,r.vol);
   const grupos=[...new Set(adds.map(a=>a.grupo))];
   grupos.forEach(grupo=>{
     const box=document.createElement("div");
@@ -791,7 +814,7 @@ function generarPdfCliente(returnHtml=false){
   const r=u.r;
   const cliente=$('cliente').value.trim() || 'Cliente';
   const proyecto=$('tipoProyecto').value;
-  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
   const addTotal=adds.reduce((s,a)=>s+a.precio,0);
   const totalBase=(r.nivel1Subtotal+addTotal)*(1+u.margen/100);
   const totalCalor=(r.nivel2Subtotal+addTotal)*(1+u.margen/100);
@@ -802,6 +825,8 @@ function generarPdfCliente(returnHtml=false){
   const terminacion=adicionalesState.diamond ? 'Revestimiento Diamond Brite' : 'Piscina pintada';
   const fecha=new Date().toLocaleDateString('es-CL');
   const fmt=n=>Number(n||0).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const obraMedidaTxt=(document.getElementById('obraMedidaTxt')?.value||'').trim();
+  const obraMedidaHtml=adicionalesState.obraMedida?`<div class="cb" style="margin-top:1.5mm"><b>Obra a medida:</b> su piscina será construida de forma artesanal, con ${obraMedidaTxt}. Es un proceso que dedica más tiempo y más manos a su proyecto, para cuidar cada detalle y adaptarlo a las características únicas de su espacio.</div>`:'';
   const adicionalesHtml=adds.length
     ? adds.map(a=>`<div class="row"><span>${a.label}</span><b>${clp(a.precio*(1+u.margen/100))}</b></div>`).join('')
     : '<div class="row"><span>Sin adicionales seleccionados</span><span>-</span></div>';
@@ -848,6 +873,7 @@ function generarPdfCliente(returnHtml=false){
     <div class="construct">
       <div class="ct">Sistema constructivo</div>
       <div class="cb">Piscina ejecutada con <b>losa armada para mejorar la estabilidad</b>, incorporando malla ACMA y fierro de 8 mm en su estructura. Los muros se consideran de aproximadamente <b>20 cm</b> y se ejecutan mediante sistema proyectado tipo <b>shotcrete (chocleteado)</b>. La losa puede ejecutarse con hormigón de camión premezclado o preparada en terreno, según la alternativa definida para la obra.</div>
+      ${obraMedidaHtml}
     </div>
 
     <section class="bottom">
@@ -902,7 +928,7 @@ async function crearArchivoPdfCliente(){
   const u=ultimoResultado, r=u.r;
   const cliente=($('cliente').value.trim() || "Cliente");
   const proyecto=$('tipoProyecto').value;
-  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30).filter(a=>adicionalesState[a.id]);
+  const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
   const addTotal=adds.reduce((sum,a)=>sum+a.precio,0);
   const factor=1+u.margen/100;
   const totalBase=(r.nivel1Subtotal+addTotal)*factor;
@@ -942,12 +968,17 @@ async function crearArchivoPdfCliente(){
   kv('Profundidad:',`${u.profMin} – ${u.profMax} m`); kv('Volumen aprox.:',`${r.vol.toFixed(1)} m³`); kv('Plazo estimado:',u.plazo);
 
   // Constructive system
-  y+=1; doc.setFillColor(246,250,253);doc.setDrawColor(191,213,231);doc.roundedRect(left,y,right-left,24,2,2,'FD');
-  doc.setFillColor(...blue);doc.rect(left,y,2.2,24,'F');
+  const obraTxtPdf=(document.getElementById('obraMedidaTxt')?.value||'').trim();
+  const obraNota=adicionalesState.obraMedida?`Obra a medida: su piscina será construida de forma artesanal, con ${obraTxtPdf}. Es un proceso que dedica más tiempo y más manos a su proyecto, para cuidar cada detalle.`:'';
+  const obraLines=obraNota?wrap(obraNota,168,8):[];
+  const consH=24+(obraLines.length?obraLines.length*3.7+3:0);
+  y+=1; doc.setFillColor(246,250,253);doc.setDrawColor(191,213,231);doc.roundedRect(left,y,right-left,consH,2,2,'FD');
+  doc.setFillColor(...blue);doc.rect(left,y,2.2,consH,'F');
   txt('SISTEMA CONSTRUCTIVO',left+5,y+6,9,navy,'bold');
   const construct='Piscina ejecutada con losa armada para mejorar la estabilidad, incorporando malla ACMA y fierro de 8 mm. Muros de aproximadamente 20 cm ejecutados mediante sistema proyectado tipo shotcrete (chocleteado). La losa puede ejecutarse con hormigón premezclado o preparado en terreno, según la alternativa cotizada.';
   txt(wrap(construct,168,8),left+5,y+11,8,ink,'normal',{lineHeightFactor:1.25});
-  y+=30;
+  if(obraLines.length) txt(obraLines,left+5,y+25,8,ink,'normal',{lineHeightFactor:1.25});
+  y+=consH+6;
 
   // Two columns
   const colGap=6, colW=(right-left-colGap)/2, x1=left, x2=left+colW+colGap;
@@ -1379,7 +1410,7 @@ $("largo").addEventListener("input",syncQuickMeasure);
 $("ancho").addEventListener("input",syncQuickMeasure);
 syncQuickMeasure();
 
-["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
+["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","excavMano","precioViaje","obraMedidaMonto","obraMedidaTxt","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
   $(id).addEventListener("input",()=>{
     render();
   });
