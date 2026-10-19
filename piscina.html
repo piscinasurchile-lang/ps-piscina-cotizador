@@ -292,8 +292,12 @@
           </div>
         </div>
         <div class="row2" style="margin-top:10px;">
-          <div class="field"><label>Valor por viaje de camión ($)</label><input type="number" id="precioViaje" value="100000" step="5000"></div>
+          <div class="field"><label>Valor por vuelta de camión ($)</label><input type="number" id="precioViaje" value="120000" step="5000"></div>
           <div class="field"><label>Obra a medida: valor al cliente ($)</label><input type="number" id="obraMedidaMonto" value="1200000" step="50000"></div>
+        </div>
+        <div class="row2" style="margin-top:10px;">
+          <div class="field"><label>Retroexcavadora para cargar (hrs)</label><input type="number" id="horasRetroCarga" value="8" step="1" min="0"></div>
+          <div class="field"><label>Valor hora retroexcavadora ($)</label><input type="number" id="precioHoraRetro" value="38000" step="1000"></div>
         </div>
         <div class="field">
           <label>Obra a medida: detalle para el cliente</label>
@@ -611,6 +615,8 @@ function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi3
   // Retiro de tierra: volumen excavado + 20% de esponjamiento, camiones de 12 m³
   const precioViaje=parseFloat(document.getElementById("precioViaje")?.value)||0;
   const viajesTierra=Math.ceil((vol*1.20)/12);
+  const horasRetro=parseFloat(document.getElementById("horasRetroCarga")?.value)||0;
+  const precioHoraRetro=parseFloat(document.getElementById("precioHoraRetro")?.value)||0;
   const obraMedidaMonto=parseFloat(document.getElementById("obraMedidaMonto")?.value)||0;
   return [
     {id:"diamond", grupo:"Terminación y aislación", label:"Revestimiento Diamond Brite", precio: 65000*areaDes},
@@ -622,7 +628,7 @@ function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi3
     {id:"manta", grupo:"Confort", label:"Manta térmica", precio: 250000},
     {id:"jacuzzi25", grupo:"Jacuzzi", label:"Jacuzzi 2,5 × 2,5 m", precio: 2000000},
     {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m · MO $2.700.000 + materiales calculados", precio: calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).total},
-    {id:"retiroTierra", grupo:"Condiciones de obra", label:`Retiro de tierra en camión (${viajesTierra} viaje${viajesTierra===1?"":"s"} de 12 m³)`, precio: viajesTierra*precioViaje},
+    {id:"retiroTierra", grupo:"Condiciones de obra", label:`Retiro de tierra (${viajesTierra} vuelta${viajesTierra===1?"":"s"} de camión de 12 m³${horasRetro>0?` + ${horasRetro} hrs retroexcavadora de carga`:""})`, precio: viajesTierra*precioViaje + horasRetro*precioHoraRetro},
     // sinMargen: se traspasa al cliente por el valor exacto indicado (no recibe el % de margen)
     {id:"obraMedida", grupo:"Condiciones de obra", label:"Adicional por obra a medida", precio: obraMedidaMonto, sinMargen:true},
   ];
@@ -652,7 +658,8 @@ function textosCondicionesCliente(adds, detalleObra, vol){
   }
   if(retiro){
     const viajes=Math.ceil((vol*1.20)/12);
-    out.push(`Retiro de tierra: incluye el traslado en camión de la tierra excavada hasta su disposición final (${viajes} viaje${viajes===1?"":"s"} de camión de 12 m³, considerando el volumen excavado más un 20% de esponjamiento).`);
+    const hrs=parseFloat(document.getElementById("horasRetroCarga")?.value)||0;
+    out.push(`Retiro de tierra: incluye el traslado en camión de la tierra excavada hasta su disposición final (${viajes} vuelta${viajes===1?"":"s"} de camión de 12 m³, considerando el volumen excavado más un 20% de esponjamiento)${hrs>0?` y ${hrs} horas de retroexcavadora para cargar los camiones`:""}.`);
   }
   return out;
 }
@@ -1450,7 +1457,7 @@ $("largo").addEventListener("input",syncQuickMeasure);
 $("ancho").addEventListener("input",syncQuickMeasure);
 syncQuickMeasure();
 
-["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","excavMano","precioViaje","obraMedidaMonto","obraMedidaTxt","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
+["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","excavMano","precioViaje","horasRetroCarga","precioHoraRetro","obraMedidaMonto","obraMedidaTxt","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
   $(id).addEventListener("input",()=>{
     render();
   });
