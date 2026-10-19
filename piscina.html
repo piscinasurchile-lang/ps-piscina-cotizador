@@ -285,6 +285,13 @@
           </div>
         </div>
         <div class="toggle-row">
+          <span>Mostrar en el PDF la alternativa con bomba de calor</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="price">Apágalo para cotizar sin bomba de calor</span>
+            <label class="switch"><input type="checkbox" id="mostrarBombaCalor" checked><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="toggle-row">
           <span>Excavación a mano (sin retroexcavadora)</span>
           <div style="display:flex;align-items:center;gap:10px;">
             <span class="price">Quita la retroexcavadora</span>
@@ -854,6 +861,7 @@ function generarPdfCliente(returnHtml=false){
   const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
   const tot=calcTotales(r,adds,u.margen);
   const {totalBase,totalCalor}=tot;
+  const mostrarCalor=$('mostrarBombaCalor')?.checked!==false;
   registrarCotizacionEnHistorial(totalBase, totalCalor);
   const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
   const tipoFiltro=filtroGrande?'BC100':'BC50';
@@ -927,7 +935,7 @@ function generarPdfCliente(returnHtml=false){
       <div class="adds-cell"><div class="box-title"><span class="icon">＋</span>Adicionales seleccionados</div>
         <div class="adicional"><div class="head"><span>ADICIONAL</span><span>VALOR INCORPORADO</span></div>${adicionalesHtml}</div>
         <div class="price"><div class="t">VALOR PROPUESTA PISCINA BASE</div><div class="v">${clp(totalBase)}</div>${desgloseHtml}</div>
-        <div class="alt">ALTERNATIVA CON BOMBA DE CALOR:<div class="v">${clp(totalCalor)}</div></div>
+        ${mostrarCalor?`<div class="alt">ALTERNATIVA CON BOMBA DE CALOR:<div class="v">${clp(totalCalor)}</div></div>`:''}
       </div>
     </section>
 
@@ -970,6 +978,7 @@ async function crearArchivoPdfCliente(){
   const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
   const tot=calcTotales(r,adds,u.margen);
   const {totalBase,totalCalor}=tot;
+  const mostrarCalor=$('mostrarBombaCalor')?.checked!==false;
   const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
   const tipoFiltro=filtroGrande?'BC100':'BC50';
   const tipoBomba=filtroGrande?'1.5 HP':'1 HP';
@@ -1057,9 +1066,11 @@ async function crearArchivoPdfCliente(){
   txt(money(totalBase),pageW/2,y+(adds.length?17:19),23,[255,255,255],'bold',{align:'center'});
   if(adds.length) txt(`Piscina ${money(tot.piscinaBase)} + adicionales ${money(tot.addCliente)}`,pageW/2,y+25,8.5,[219,232,246],'normal',{align:'center'});
   y+=priceH+5;
-  doc.setDrawColor(...blue);doc.setLineWidth(.7);doc.roundedRect(left,y,right-left,18,3,3,'S');
-  txt('ALTERNATIVA CON BOMBA DE CALOR',pageW/2,y+6,8.5,navy,'bold',{align:'center'});
-  txt(money(totalCalor),pageW/2,y+14,16,navy,'bold',{align:'center'});
+  if(mostrarCalor){
+    doc.setDrawColor(...blue);doc.setLineWidth(.7);doc.roundedRect(left,y,right-left,18,3,3,'S');
+    txt('ALTERNATIVA CON BOMBA DE CALOR',pageW/2,y+6,8.5,navy,'bold',{align:'center'});
+    txt(money(totalCalor),pageW/2,y+14,16,navy,'bold',{align:'center'});
+  }
 
   // Footer/legal
   y=264; txt(wrap('Los valores corresponden a las medidas y características indicadas en esta propuesta. Cualquier modificación del proyecto puede afectar el valor final.',170,7.5),pageW/2,y,7.5,muted,'normal',{align:'center',lineHeightFactor:1.2});
@@ -1457,7 +1468,7 @@ $("largo").addEventListener("input",syncQuickMeasure);
 $("ancho").addEventListener("input",syncQuickMeasure);
 syncQuickMeasure();
 
-["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","excavMano","precioViaje","horasRetroCarga","precioHoraRetro","obraMedidaMonto","obraMedidaTxt","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
+["largo","ancho","profMin","profMax","profJacuzzi30","tipoBorde","margen","ciudad","tipoProyecto","cliente","incGastos","excavMano","mostrarBombaCalor","precioViaje","horasRetroCarga","precioHoraRetro","obraMedidaMonto","obraMedidaTxt","tipoLosa","espesorLosa","numFocos","plazo"].forEach(id=>{
   $(id).addEventListener("input",()=>{
     render();
   });
