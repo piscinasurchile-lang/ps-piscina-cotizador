@@ -293,7 +293,7 @@
         </div>
         <div class="row2" style="margin-top:10px;">
           <div class="field"><label>Valor por viaje de camión ($)</label><input type="number" id="precioViaje" value="100000" step="5000"></div>
-          <div class="field"><label>Obra a medida: costo neto ($)</label><input type="number" id="obraMedidaMonto" value="1200000" step="50000"></div>
+          <div class="field"><label>Obra a medida: valor al cliente ($)</label><input type="number" id="obraMedidaMonto" value="1200000" step="50000"></div>
         </div>
         <div class="field">
           <label>Obra a medida: detalle para el cliente</label>
@@ -623,8 +623,38 @@ function adicionalesList(areaDes, ciudadInfo=null, tipoLosa="mano", profJacuzzi3
     {id:"jacuzzi25", grupo:"Jacuzzi", label:"Jacuzzi 2,5 × 2,5 m", precio: 2000000},
     {id:"jacuzzi30", grupo:"Jacuzzi", label:"Jacuzzi 3 × 3 m · MO $2.700.000 + materiales calculados", precio: calcularJacuzzi30(ciudadInfo,tipoLosa,profJacuzzi30).total},
     {id:"retiroTierra", grupo:"Condiciones de obra", label:`Retiro de tierra en camión (${viajesTierra} viaje${viajesTierra===1?"":"s"} de 12 m³)`, precio: viajesTierra*precioViaje},
-    {id:"obraMedida", grupo:"Condiciones de obra", label:"Adicional por obra a medida", precio: obraMedidaMonto},
+    // sinMargen: se traspasa al cliente por el valor exacto indicado (no recibe el % de margen)
+    {id:"obraMedida", grupo:"Condiciones de obra", label:"Adicional por obra a medida", precio: obraMedidaMonto, sinMargen:true},
   ];
+}
+
+// Totales de la propuesta. Los adicionales reciben el margen, salvo los marcados sinMargen.
+function calcTotales(r, adds, margen){
+  const factor=1+margen/100;
+  const precioCliente=a=>a.sinMargen?a.precio:a.precio*factor;
+  const addNeto=adds.reduce((s,a)=>s+a.precio,0);
+  const addCliente=adds.reduce((s,a)=>s+precioCliente(a),0);
+  const piscinaBase=r.nivel1Subtotal*factor;
+  const piscinaCalor=r.nivel2Subtotal*factor;
+  return {factor, precioCliente, addNeto, addCliente, piscinaBase, piscinaCalor,
+    totalBase:piscinaBase+addCliente, totalCalor:piscinaCalor+addCliente,
+    haySinMargen:adds.some(a=>a.sinMargen)};
+}
+
+// Texto para la clienta: por qué se suma el adicional y en qué consiste el retiro de tierra.
+function textosCondicionesCliente(adds, detalleObra, vol){
+  const out=[];
+  const obra=adds.find(a=>a.id==="obraMedida");
+  const retiro=adds.find(a=>a.id==="retiroTierra");
+  if(obra){
+    const det=(detalleObra||"").trim().replace(/[.\s]+$/,"");
+    out.push(`Adicional por obra a medida: su piscina será construida de forma artesanal${det?`, con ${det}`:""}. Es un proceso que dedica más tiempo y más manos a su proyecto, para cuidar cada detalle y adaptarlo a las características únicas de su espacio. Por eso la propuesta incorpora este adicional, que refleja el mayor trabajo y dedicación que requiere su obra.`);
+  }
+  if(retiro){
+    const viajes=Math.ceil((vol*1.20)/12);
+    out.push(`Retiro de tierra: incluye el traslado en camión de la tierra excavada hasta su disposición final (${viajes} viaje${viajes===1?"":"s"} de camión de 12 m³, considerando el volumen excavado más un 20% de esponjamiento).`);
+  }
+  return out;
 }
 
 /* =======================================================================
@@ -744,14 +774,14 @@ function render(){
     });
   });
   const selectedAdds = adds.filter(a=>adicionalesState[a.id]);
-  const addTotal = selectedAdds.reduce((s,a)=>s+a.precio,0);
-  const mk=margen/100;
+  const tot = calcTotales(r, selectedAdds, margen);
+  const addTotal = tot.addNeto;
 
-  // Los adicionales forman parte del costo neto de la propuesta y reciben el mismo margen.
+  // Los adicionales forman parte del costo neto y reciben el margen, salvo "obra a medida" (valor exacto).
   const nivel1SubtotalConAdds = r.nivel1Subtotal + addTotal;
   const nivel2SubtotalConAdds = r.nivel2Subtotal + addTotal;
-  const nivel1TotalConAdds = nivel1SubtotalConAdds * (1+mk);
-  const nivel2TotalConAdds = nivel2SubtotalConAdds * (1+mk);
+  const nivel1TotalConAdds = tot.totalBase;
+  const nivel2TotalConAdds = tot.totalCalor;
   const addItems = selectedAdds.map(a=>[a.label, a.precio]);
 
   // tiers
@@ -775,7 +805,7 @@ function render(){
     el.innerHTML=`${d.reco?'<div class="reco-badge">Recomendado</div>':""}
       <div class="name">${d.name}</div>
       <div class="total">${clp(d.total)}</div>
-      <div class="sub">Neto ${clp(d.sub)} + ${margen}% margen</div>
+      <div class="sub">Neto ${clp(d.sub)} + ${margen}% margen${tot.haySinMargen?" (obra a medida sin margen)":""}</div>
       <ul>${d.items.map(it=>`<li><span>${it[0]}</span><b>${clp(it[1])}</b></li>`).join("")}</ul>`;
     tiersEl.appendChild(el);
   });
@@ -783,7 +813,7 @@ function render(){
   if(addTotal>0){
     const note=document.createElement("div");
     note.style.cssText="grid-column:1/-1;font-size:12px;color:var(--teal-300);text-align:center;padding-top:4px;";
-    note.textContent=`Adicionales incorporados al total: ${clp(addTotal)} neto · ${clp(addTotal*(1+mk))} con margen ${margen}%`;
+    note.textContent=`Adicionales incorporados al total: ${clp(addTotal)} neto · ${clp(tot.addCliente)} al cliente (margen ${margen}%${tot.haySinMargen?", salvo obra a medida":""})`;
     tiersEl.appendChild(note);
   }
 
@@ -815,9 +845,8 @@ function generarPdfCliente(returnHtml=false){
   const cliente=$('cliente').value.trim() || 'Cliente';
   const proyecto=$('tipoProyecto').value;
   const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
-  const addTotal=adds.reduce((s,a)=>s+a.precio,0);
-  const totalBase=(r.nivel1Subtotal+addTotal)*(1+u.margen/100);
-  const totalCalor=(r.nivel2Subtotal+addTotal)*(1+u.margen/100);
+  const tot=calcTotales(r,adds,u.margen);
+  const {totalBase,totalCalor}=tot;
   registrarCotizacionEnHistorial(totalBase, totalCalor);
   const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
   const tipoFiltro=filtroGrande?'BC100':'BC50';
@@ -825,11 +854,14 @@ function generarPdfCliente(returnHtml=false){
   const terminacion=adicionalesState.diamond ? 'Revestimiento Diamond Brite' : 'Piscina pintada';
   const fecha=new Date().toLocaleDateString('es-CL');
   const fmt=n=>Number(n||0).toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const obraMedidaTxt=(document.getElementById('obraMedidaTxt')?.value||'').trim();
-  const obraMedidaHtml=adicionalesState.obraMedida?`<div class="cb" style="margin-top:1.5mm"><b>Obra a medida:</b> su piscina será construida de forma artesanal, con ${obraMedidaTxt}. Es un proceso que dedica más tiempo y más manos a su proyecto, para cuidar cada detalle y adaptarlo a las características únicas de su espacio.</div>`:'';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const condicionesHtml=textosCondicionesCliente(adds,document.getElementById('obraMedidaTxt')?.value,r.vol)
+    .map(t=>{const i=t.indexOf(':');return `<div class="cb" style="margin-top:1.5mm"><b>${esc(t.slice(0,i+1))}</b>${esc(t.slice(i+1))}</div>`}).join('');
+  const obraMedidaHtml=condicionesHtml;
   const adicionalesHtml=adds.length
-    ? adds.map(a=>`<div class="row"><span>${a.label}</span><b>${clp(a.precio*(1+u.margen/100))}</b></div>`).join('')
+    ? adds.map(a=>`<div class="row"><span>${a.label}</span><b>${clp(tot.precioCliente(a))}</b></div>`).join('')
     : '<div class="row"><span>Sin adicionales seleccionados</span><span>-</span></div>';
+  const desgloseHtml=adds.length?`<div style="font-size:9.5px;font-weight:400;margin-top:1.6mm;color:#dbe8f6">Piscina ${clp(tot.piscinaBase)} + adicionales ${clp(tot.addCliente)}</div>`:'';
 
   const pdfHtml=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0a3568">
@@ -887,7 +919,7 @@ function generarPdfCliente(returnHtml=false){
       </div></div>
       <div class="adds-cell"><div class="box-title"><span class="icon">＋</span>Adicionales seleccionados</div>
         <div class="adicional"><div class="head"><span>ADICIONAL</span><span>VALOR INCORPORADO</span></div>${adicionalesHtml}</div>
-        <div class="price"><div class="t">VALOR PROPUESTA PISCINA BASE</div><div class="v">${clp(totalBase)}</div></div>
+        <div class="price"><div class="t">VALOR PROPUESTA PISCINA BASE</div><div class="v">${clp(totalBase)}</div>${desgloseHtml}</div>
         <div class="alt">ALTERNATIVA CON BOMBA DE CALOR:<div class="v">${clp(totalCalor)}</div></div>
       </div>
     </section>
@@ -929,10 +961,8 @@ async function crearArchivoPdfCliente(){
   const cliente=($('cliente').value.trim() || "Cliente");
   const proyecto=$('tipoProyecto').value;
   const adds=adicionalesList(r.areaDes,u.ciudadInfo,u.tipoLosa,u.profJacuzzi30,r.vol).filter(a=>adicionalesState[a.id]);
-  const addTotal=adds.reduce((sum,a)=>sum+a.precio,0);
-  const factor=1+u.margen/100;
-  const totalBase=(r.nivel1Subtotal+addTotal)*factor;
-  const totalCalor=(r.nivel2Subtotal+addTotal)*factor;
+  const tot=calcTotales(r,adds,u.margen);
+  const {totalBase,totalCalor}=tot;
   const filtroGrande=r.vol>=RATIOS.umbralFiltroBombaM3;
   const tipoFiltro=filtroGrande?'BC100':'BC50';
   const tipoBomba=filtroGrande?'1.5 HP':'1 HP';
@@ -942,7 +972,10 @@ async function crearArchivoPdfCliente(){
 
   const navy=[10,53,104], blue=[13,113,185], cyan=[23,184,223], ink=[36,54,74], muted=[92,112,135], light=[242,247,251];
   const pageW=210, left=14, right=196;
-  const safe=(v)=>String(v ?? "");
+  // Las listas de líneas (resultado de wrap) deben seguir siendo listas; String() las unía con comas en una sola línea.
+  // Helvetica del PDF no trae ² ni ³: se escriben como 2 y 3 (m2, m3) para que no desaparezcan.
+  const pdfStr=(x)=>String(x ?? "").replace(/²/g,"2").replace(/³/g,"3");
+  const safe=(v)=>Array.isArray(v)?v.map(pdfStr):pdfStr(v);
   const money=(n)=>clp(n);
   const line=(x1,y1,x2,y2,color=[207,217,229])=>{doc.setDrawColor(...color);doc.line(x1,y1,x2,y2)};
   const txt=(t,x,y,size=9,color=ink,style='normal',opts={})=>{doc.setFont('helvetica',style);doc.setFontSize(size);doc.setTextColor(...color);doc.text(safe(t),x,y,opts)};
@@ -968,24 +1001,29 @@ async function crearArchivoPdfCliente(){
   kv('Profundidad:',`${u.profMin} – ${u.profMax} m`); kv('Volumen aprox.:',`${r.vol.toFixed(1)} m³`); kv('Plazo estimado:',u.plazo);
 
   // Constructive system
-  const obraTxtPdf=(document.getElementById('obraMedidaTxt')?.value||'').trim();
-  const obraNota=adicionalesState.obraMedida?`Obra a medida: su piscina será construida de forma artesanal, con ${obraTxtPdf}. Es un proceso que dedica más tiempo y más manos a su proyecto, para cuidar cada detalle.`:'';
-  const obraLines=obraNota?wrap(obraNota,168,8):[];
-  const consH=24+(obraLines.length?obraLines.length*3.7+3:0);
+  const LH=3.7; // alto de línea (mm) para texto de 8 pt con interlineado 1.25
+  const construct='Piscina ejecutada con losa armada para mejorar la estabilidad, incorporando malla ACMA y fierro de 8 mm. Muros de aproximadamente 20 cm ejecutados mediante sistema proyectado tipo shotcrete (chocleteado). La losa puede ejecutarse con hormigón premezclado o preparado en terreno, según la alternativa cotizada.';
+  const constructLines=wrap(construct,168,8);
+  const condiciones=textosCondicionesCliente(adds,document.getElementById('obraMedidaTxt')?.value,r.vol).map(t=>wrap(t,168,8));
+  const consH=14+constructLines.length*LH+condiciones.reduce((s,l)=>s+l.length*LH+2.5,0);
   y+=1; doc.setFillColor(246,250,253);doc.setDrawColor(191,213,231);doc.roundedRect(left,y,right-left,consH,2,2,'FD');
   doc.setFillColor(...blue);doc.rect(left,y,2.2,consH,'F');
   txt('SISTEMA CONSTRUCTIVO',left+5,y+6,9,navy,'bold');
-  const construct='Piscina ejecutada con losa armada para mejorar la estabilidad, incorporando malla ACMA y fierro de 8 mm. Muros de aproximadamente 20 cm ejecutados mediante sistema proyectado tipo shotcrete (chocleteado). La losa puede ejecutarse con hormigón premezclado o preparado en terreno, según la alternativa cotizada.';
-  txt(wrap(construct,168,8),left+5,y+11,8,ink,'normal',{lineHeightFactor:1.25});
-  if(obraLines.length) txt(obraLines,left+5,y+25,8,ink,'normal',{lineHeightFactor:1.25});
+  let cy=y+11;
+  txt(constructLines,left+5,cy,8,ink,'normal',{lineHeightFactor:1.25}); cy+=constructLines.length*LH+2.5;
+  condiciones.forEach(ls=>{txt(ls,left+5,cy,8,ink,'normal',{lineHeightFactor:1.25}); cy+=ls.length*LH+2.5;});
   y+=consH+6;
 
   // Two columns
   const colGap=6, colW=(right-left-colGap)/2, x1=left, x2=left+colW+colGap;
   txt('EQUIPAMIENTO Y TERMINACIONES',x1,y,9.5,navy,'bold');
   txt('ADICIONALES SELECCIONADOS',x2,y,9.5,navy,'bold'); y+=5;
-  doc.setFillColor(...light);doc.roundedRect(x1,y,colW,52,2,2,'F');
-  doc.setFillColor(...light);doc.roundedRect(x2,y,colW,52,2,2,'F');
+  // Alto de las cajas según el contenido de la columna de adicionales
+  const addLabels=adds.map(a=>wrap(a.label,colW-33,7.8));
+  const addsH=12+addLabels.reduce((s,l)=>s+Math.max(5,l.length*3.5+1),0);
+  const boxH=Math.max(52,addsH);
+  doc.setFillColor(...light);doc.roundedRect(x1,y,colW,boxH,2,2,'F');
+  doc.setFillColor(...light);doc.roundedRect(x2,y,colW,boxH,2,2,'F');
   let ey=y+6;
   const equip=[
     `Bomba Vulcano ${tipoBomba}`,
@@ -995,21 +1033,23 @@ async function crearArchivoPdfCliente(){
     `Borde: ${u.borde}`,
     'Filtración, fitting hidráulico y tablero eléctrico'
   ];
-  equip.forEach(t=>{txt('✓',x1+4,ey,8,blue,'bold');const ls=wrap(t,colW-12,8);txt(ls,x1+9,ey,8,ink,'normal',{lineHeightFactor:1.15});ey+=Math.max(5,ls.length*3.7+1)});
+  equip.forEach(t=>{doc.setFillColor(...blue);doc.circle(x1+4.6,ey-1.1,1.3,'F');const ls=wrap(t,colW-12,8);txt(ls,x1+9,ey,8,ink,'normal',{lineHeightFactor:1.15});ey+=Math.max(5,ls.length*3.7+1)});
   let ay=y+6;
   if(adds.length===0){txt('Sin adicionales seleccionados',x2+4,ay,8,muted,'normal');}
-  else adds.forEach(a=>{
-    const label=wrap(a.label,colW-33,7.8);txt(label,x2+4,ay,7.8,ink,'normal',{lineHeightFactor:1.1});
-    txt(money(a.precio*factor),x2+colW-4,ay,7.8,navy,'bold',{align:'right'});
+  else adds.forEach((a,i)=>{
+    const label=addLabels[i];txt(label,x2+4,ay,7.8,ink,'normal',{lineHeightFactor:1.1});
+    txt(money(tot.precioCliente(a)),x2+colW-4,ay,7.8,navy,'bold',{align:'right'});
     ay+=Math.max(5,label.length*3.5+1);
   });
-  y+=59;
+  y+=boxH+7;
 
   // Main price
-  doc.setFillColor(...navy);doc.roundedRect(left,y,right-left,25,3,3,'F');
-  txt('VALOR PROPUESTA PISCINA BASE',pageW/2,y+8,9,[235,245,255],'bold',{align:'center'});
-  txt(money(totalBase),pageW/2,y+19,23,[255,255,255],'bold',{align:'center'});
-  y+=30;
+  const priceH=adds.length?30:25;
+  doc.setFillColor(...navy);doc.roundedRect(left,y,right-left,priceH,3,3,'F');
+  txt('VALOR PROPUESTA PISCINA BASE',pageW/2,y+7,9,[235,245,255],'bold',{align:'center'});
+  txt(money(totalBase),pageW/2,y+(adds.length?17:19),23,[255,255,255],'bold',{align:'center'});
+  if(adds.length) txt(`Piscina ${money(tot.piscinaBase)} + adicionales ${money(tot.addCliente)}`,pageW/2,y+25,8.5,[219,232,246],'normal',{align:'center'});
+  y+=priceH+5;
   doc.setDrawColor(...blue);doc.setLineWidth(.7);doc.roundedRect(left,y,right-left,18,3,3,'S');
   txt('ALTERNATIVA CON BOMBA DE CALOR',pageW/2,y+6,8.5,navy,'bold',{align:'center'});
   txt(money(totalCalor),pageW/2,y+14,16,navy,'bold',{align:'center'});
