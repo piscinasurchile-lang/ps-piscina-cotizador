@@ -393,7 +393,7 @@ const BOMBA_CALOR_INSTALACION = 380000;
 const RATIOS = {
   cementoSacosPorM3Arido:15, mallaM2PorMalla:8, fierroMlPorM2Des:4, fierroTiraM:6,
   arenaGruesaM3PorM3:0.4288, revueltoFinoM3PorM3:0.2339, espesorLosaM:0.20, pilarEspaciamientoM:3,
-  bordePiedraLargoM:0.5, bordePiedrasRespaldo:8, bordePiedraPrecioUd:6500, bordeAnchoM:0.40,
+  bordePiedraLargoM:0.5, bordePiedrasRespaldo:8, bordePiedraPrecioUd:6500, bordeAnchoM:0.50,
   pegamentoM2PorSaco:2.5, pegamentoPrecioSaco:18000, bordeFleteFijo:250000,
   pilarPrecioUd:9790, pinturaBordePrecioMl:8000, fierroTiraPrecioUd:2876,
   sobrecostoBordeInfinitoM2:150000, estanqueCompensadorFijo:2200000, umbralFiltroBombaM3:48,
@@ -528,7 +528,7 @@ function calcular(input){
     ["Válvulas PVC", 2, "ud", 19300, 38600, "EQUIPAMIENTO FILTRO / PVC"],
     ["Fitting hidráulico (codos, tee, terminales, tubería, pegamento)", 1, "gl", 128800+14637+4300+6600+2590+182280+44730, 128800+14637+4300+6600+2590+182280+44730, "FITTING HIDRÁULICO"],
     ["Eléctrico (tablero, conduit, cable, focos LED, tierra, pedestal)", 1, "gl", 157000+12100+3927+73800+10600+21000+261000+45000, 157000+12100+3927+73800+10600+21000+261000+45000, "ELÉCTRICO Y OTROS"],
-    ["Piedra borde 40x40 (perímetro ÷ 0,5 m + 8 de respaldo)", piedrasBorde, "ud", RATIOS.bordePiedraPrecioUd, piedrasBorde*RATIOS.bordePiedraPrecioUd, "BORDE PISCINA"],
+    ["Piedra borde 50x50 (perímetro ÷ 0,5 m + 8 de respaldo)", piedrasBorde, "ud", RATIOS.bordePiedraPrecioUd, piedrasBorde*RATIOS.bordePiedraPrecioUd, "BORDE PISCINA"],
     ["Pegamento Weber blanco 25 kg (2,5 m² por saco)", sacosPegamento, "sacos", RATIOS.pegamentoPrecioSaco, sacosPegamento*RATIOS.pegamentoPrecioSaco, "BORDE PISCINA"],
     ["Flete piedra Santiago–Freire (promedio)", 1, "gl", RATIOS.bordeFleteFijo, RATIOS.bordeFleteFijo, "BORDE PISCINA"],
     ["Terminaciones / pinturas", 1, "gl", 260000+18500+5400, 260000+18500+5400, "TERMINACIONES"],
