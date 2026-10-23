@@ -184,7 +184,7 @@
         <small>PiscinaSur Chile — motor interno de presupuesto</small>
       </div>
     </div>
-    <div class="tag" id="cityTag">Puerto Montt · Hub Puerto Montt</div>
+    <div class="tag" id="cityTag">Selecciona una ciudad</div>
     <div class="tag" id="ufTag" style="margin-top:6px;">UF: cargando…</div>
   </header>
 
@@ -209,7 +209,7 @@
           </div>
           <div class="field">
             <label>Ciudad del proyecto</label>
-            <select id="ciudad"></select>
+            <select id="ciudad" autocomplete="off"></select>
           </div>
         </div>
       </div>
@@ -675,10 +675,12 @@ function textosCondicionesCliente(adds, detalleObra, vol){
    ======================================================================= */
 const $ = id=>document.getElementById(id);
 const ciudadSel = $("ciudad");
+// La ciudad no tiene valor por defecto: el vendedor debe elegirla (define los precios por sede).
+const ciudadVacia=document.createElement("option"); ciudadVacia.value=""; ciudadVacia.textContent="Selecciona una ciudad…"; ciudadSel.appendChild(ciudadVacia);
 CIUDADES.forEach(c=>{
   const o=document.createElement("option"); o.value=c.ciudad; o.textContent=c.ciudad; ciudadSel.appendChild(o);
 });
-ciudadSel.value="Puerto Montt";
+ciudadSel.value="";
 
 let adicionalesState = {};
 const nowQuote = new Date();
@@ -689,6 +691,7 @@ function validarCotizacion(){
   const largo=parseFloat($("largo").value)||0, ancho=parseFloat($("ancho").value)||0;
   const pmin=parseFloat($("profMin").value)||0, pmax=parseFloat($("profMax").value)||0;
   const errores=[];
+  if(!$("ciudad").value) errores.push("Selecciona una ciudad.");
   if(largo<=0 || ancho<=0) errores.push("Largo y ancho deben ser mayores que cero.");
   if(pmin<=0 || pmax<=0) errores.push("Las profundidades deben ser mayores que cero.");
   if(pmax<pmin) errores.push("La profundidad máxima no puede ser menor que la mínima.");
@@ -741,6 +744,17 @@ function render(){
   const profJacuzzi30=parseFloat($("profJacuzzi30")?.value)||0;
   validarCotizacion();
 
+  if(!ciudadInfo){
+    // Sin ciudad no hay precios por sede: se limpia el presupuesto hasta que se elija una.
+    $("cityTag").textContent="Selecciona una ciudad";
+    ultimoResultado=null;
+    drawPool(largo,ancho,profMin,profMax);
+    ["stSup","stVol","stPer","stDes"].forEach(id=>{ $(id).textContent="—"; });
+    $("adicionales").innerHTML="";
+    $("tiers").innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--slate-500)">Selecciona una ciudad para ver el presupuesto.</div>`;
+    $("breakdown").innerHTML="";
+    return;
+  }
   $("cityTag").textContent=`${ciudadInfo.ciudad} · Hub ${ciudadInfo.hub}`;
 
   const r=calcular({largo,ancho,profMin,profMax,ciudadInfo,borde,margen,incGastos,tipoLosa,espesorLosa,excavMano});
