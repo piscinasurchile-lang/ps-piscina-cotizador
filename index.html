@@ -390,6 +390,7 @@ const BOMBA_CALOR_TIERS = [
 ];
 const BOMBA_CALOR_INSTALACION = 380000;
 
+// Equipamiento y PVC: Electroriego Villarrica, boleta 23-oct-2026 (filtro, bomba 1HP, arena, skimmer, dreno, retornos, válvulas).
 const RATIOS = {
   cementoSacosPorM3Arido:15, mallaM2PorMalla:8, fierroMlPorM2Des:4, fierroTiraM:6,
   arenaGruesaM3PorM3:0.4288, revueltoFinoM3PorM3:0.2339, espesorLosaM:0.20, pilarEspaciamientoM:3,
@@ -397,8 +398,8 @@ const RATIOS = {
   pegamentoM2PorSaco:2.5, pegamentoPrecioSaco:18000, bordeFleteFijo:250000,
   pilarPrecioUd:9790, pinturaBordePrecioMl:8000, fierroTiraPrecioUd:2876,
   sobrecostoBordeInfinitoM2:150000, estanqueCompensadorFijo:2200000, umbralFiltroBombaM3:48,
-  kitFleteTemucoPtoMontt:80000, filtroBC50:181000, bombaBC1hp:155000, filtroBC100:240000, bomba15hp:243000,
-  cargaFiltrantePrecioSaco:13590, cargaSacosChico:6, cargaSacosGrande:10,
+  kitFleteTemucoPtoMontt:80000, filtroBC50:149950, bombaBC1hp:209000, filtroBC100:210000, bomba15hp:243000,
+  cargaFiltrantePrecioSaco:14900, cargaSacosChico:6, cargaSacosGrande:10,
 };
 
 const MARGEN_DEFAULT = 0.25;
@@ -522,10 +523,10 @@ function calcular(input){
     ["Bomba "+(filtroGrande?"1.5HP":"1HP"), 1, "ud", precioBomba, precioBomba, "EQUIPAMIENTO FILTRO / PVC"],
     ["Carga filtrante arena cuarzo", sacosCarga, "sacos", RATIOS.cargaFiltrantePrecioSaco, sacosCarga*RATIOS.cargaFiltrantePrecioSaco, "EQUIPAMIENTO FILTRO / PVC"],
     ["Flete kit bomba+filtro (fijo)", 1, "gl", RATIOS.kitFleteTemucoPtoMontt, RATIOS.kitFleteTemucoPtoMontt, "EQUIPAMIENTO FILTRO / PVC"],
-    ["Skimmer boca ancha", 1, "ud", 62000, 62000, "EQUIPAMIENTO FILTRO / PVC"],
-    ["Sumideros / drenos", 1, "ud", 12000, 12000, "EQUIPAMIENTO FILTRO / PVC"],
-    ["Boquillas", 4, "ud", 8000, 32000, "EQUIPAMIENTO FILTRO / PVC"],
-    ["Válvulas PVC", 2, "ud", 19300, 38600, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Skimmer boca ancha", 1, "ud", 59900, 59900, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Sumideros / drenos", 1, "ud", 14500, 14500, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Boquillas", 4, "ud", 4950, 19800, "EQUIPAMIENTO FILTRO / PVC"],
+    ["Válvulas PVC", 2, "ud", 11990, 23980, "EQUIPAMIENTO FILTRO / PVC"],
     ["Fitting hidráulico (codos, tee, terminales, tubería, pegamento)", 1, "gl", 128800+14637+4300+6600+2590+182280+44730, 128800+14637+4300+6600+2590+182280+44730, "FITTING HIDRÁULICO"],
     ["Eléctrico (tablero, conduit, cable, focos LED, tierra, pedestal)", 1, "gl", 157000+12100+3927+73800+10600+21000+261000+45000, 157000+12100+3927+73800+10600+21000+261000+45000, "ELÉCTRICO Y OTROS"],
     ["Piedra borde 50x50 (perímetro ÷ 0,5 m + 8 de respaldo)", piedrasBorde, "ud", RATIOS.bordePiedraPrecioUd, piedrasBorde*RATIOS.bordePiedraPrecioUd, "BORDE PISCINA"],
