@@ -416,9 +416,9 @@ const BOMBA_CALOR_TIERS = [
 const BOMBA_CALOR_INSTALACION = 380000;
 
 const RATIOS = {
-  cementoSacosPorM3Arido:15, mallaM2PorMalla:8, cadenaMPorCadena:3, fierroMlPorM2Des:4, fierroTiraM:6,
+  cementoSacosPorM3Arido:15, mallaM2PorMalla:8, fierroMlPorM2Des:4, fierroTiraM:6,
   arenaGruesaM3PorM3:0.4288, revueltoFinoM3PorM3:0.2339, espesorLosaM:0.15, pilarEspaciamientoM:3,
-  pilarPrecioUd:45000, pinturaBordePrecioMl:8000, cadenaPrecioUd:14256, fierroTiraPrecioUd:2876,
+  pilarPrecioUd:9790, pinturaBordePrecioMl:8000, fierroTiraPrecioUd:2876,
   sobrecostoBordeInfinitoM2:150000, estanqueCompensadorFijo:2200000, umbralFiltroBombaM3:48,
   kitFleteTemucoPtoMontt:80000, filtroBC50:181000, bombaBC1hp:155000, filtroBC100:240000, bomba15hp:243000,
   cargaFiltrantePrecioSaco:13590, cargaSacosChico:6, cargaSacosGrande:10,
@@ -511,7 +511,6 @@ function calcular(input){
   const losaCamion = tipoLosa==="camion" ? volumenLosa : 0;
   const sacosCemento = Math.round(RATIOS.cementoSacosPorM3Arido*(arenaGruesa+arenaFina+losaMano));
   const mallaUd = Math.ceil(areaDes/RATIOS.mallaM2PorMalla);
-  const cadenaUd = Math.ceil(per/RATIOS.cadenaMPorCadena);
   const fierroTiras = Math.ceil((areaDes*RATIOS.fierroMlPorM2Des)/RATIOS.fierroTiraM);
   const pilaresUd = Math.ceil(per/RATIOS.pilarEspaciamientoM);
   const bordeInfinitoSobrecosto = borde==="Infinito" ? sup*RATIOS.sobrecostoBordeInfinitoM2 : 0;
@@ -524,7 +523,6 @@ function calcular(input){
       : ["Losa con camión (hormigón Melón) — Largo×Ancho×Espesor", losaCamion, "m3", precioHormigon, losaCamion*precioHormigon, "HORMIGONES PISCINA"],
     ["Sacos cemento (15 sacos/m3 árido)", sacosCemento, "ud", precioCemento, sacosCemento*precioCemento, "HORMIGONES PISCINA"],
     ["Malla ACMA C-92", mallaUd, "ud", precioMalla, mallaUd*precioMalla, "HORMIGONES PISCINA"],
-    ["Cadenas", cadenaUd, "ud", RATIOS.cadenaPrecioUd, cadenaUd*RATIOS.cadenaPrecioUd, "HORMIGONES PISCINA"],
     ["Fierro 8mm (tiras 6m)", fierroTiras, "tiras", RATIOS.fierroTiraPrecioUd, fierroTiras*RATIOS.fierroTiraPrecioUd, "HORMIGONES PISCINA"],
     ["Pilares estructurales", pilaresUd, "ud", RATIOS.pilarPrecioUd, pilaresUd*RATIOS.pilarPrecioUd, "HORMIGONES PISCINA"],
     ["Pintura borde piscina", 1, "gl", per*RATIOS.pinturaBordePrecioMl, per*RATIOS.pinturaBordePrecioMl, "HORMIGONES PISCINA"],
