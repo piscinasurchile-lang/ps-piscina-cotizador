@@ -503,6 +503,7 @@ function calcular(input){
     tipoLosa==="mano"
       ? ["Losa a mano (revuelto fino) — Largo×Ancho×Espesor", losaMano, "m3", precioArido, losaMano*precioArido, "HORMIGONES PISCINA"]
       : ["Losa con camión (hormigón Melón) — Largo×Ancho×Espesor", losaCamion, "m3", precioHormigon, losaCamion*precioHormigon, "HORMIGONES PISCINA"],
+    ...(tipoLosa==="camion" && losaCamion < 7.5 ? [["Camión vacío Melón (7,5 m³ menos volumen solicitado) — 1 UF/m³", round1(7.5-losaCamion), "m3", valorUFActual, (7.5-losaCamion)*valorUFActual, "HORMIGONES PISCINA"]] : []),
     ["Sacos cemento (15 sacos/m3 árido)", sacosCemento, "ud", precioCemento, sacosCemento*precioCemento, "HORMIGONES PISCINA"],
     ["Malla ACMA C-92", mallaUd, "ud", precioMalla, mallaUd*precioMalla, "HORMIGONES PISCINA"],
     ["Fierro 8mm (tiras 6m)", fierroTiras, "tiras", RATIOS.fierroTiraPrecioUd, fierroTiras*RATIOS.fierroTiraPrecioUd, "HORMIGONES PISCINA"],
