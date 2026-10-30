@@ -738,6 +738,18 @@ function render(){
   const nivel2TotalConAdds = nivel2SubtotalConAdds * (1+mk);
   const addItems = selectedAdds.map(a=>[a.label, a.precio]);
 
+  // Indicador visual temporal: no altera cálculos ni documentos comerciales.
+  const testAnterior=document.getElementById("prueba-identificacion-4x4");
+  if(testAnterior) testAnterior.remove();
+  if(Math.abs(largo-4)<0.001 && Math.abs(ancho-4)<0.001){
+    const indicador=document.createElement("div");
+    indicador.id="prueba-identificacion-4x4";
+    indicador.setAttribute("role","status");
+    indicador.style.cssText="margin:12px 0;padding:14px;border:2px solid #f0a83c;border-radius:10px;color:#fff;background:#473210;font-size:17px;font-weight:700;text-align:center;";
+    indicador.textContent="PRUEBA DE IDENTIFICACIÓN V8.20j · PISCINA 4 × 4 · $1 CLP (NO ES PRECIO DE VENTA)";
+    $("tiers").parentElement.insertBefore(indicador,$("tiers"));
+  }
+
   // tiers
   const tiersEl=$("tiers");
   const data=[
